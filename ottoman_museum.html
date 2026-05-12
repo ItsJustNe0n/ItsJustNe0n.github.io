@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Ottoman Museum — Istanbul</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #C9973A;
+    --gold-light: #E8C87A;
+    --gold-pale: #F5E9C8;
+    --crimson: #8B1A1A;
+    --crimson-dark: #5C0F0F;
+    --ink: #1A1410;
+    --parchment: #F2E8D0;
+    --parchment-dark: #DDD0B0;
+    --stone: #8C7B6B;
+    --tile-blue: #1E5799;
+    --tile-teal: #1A7A6E;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Cormorant Garamond', serif;
+    background: var(--ink);
+    color: var(--parchment);
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ===== CUSTOM CURSOR ===== */
+  * { cursor: none !important; }
+  #cursor {
+    position: fixed;
+    width: 20px; height: 20px;
+    border: 1.5px solid var(--gold);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 10000;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s, background 0.2s, border-color 0.2s;
+    mix-blend-mode: normal;
+  }
+  #cursor-dot {
+    position: fixed;
+    width: 4px; height: 4px;
+    background: var(--gold);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 10000;
+    transform: translate(-50%, -50%);
+  }
+  #cursor.hover {
+    transform: translate(-50%, -50%) scale(2);
+    background: rgba(201,151,58,0.15);
+    border-color: var(--gold-light);
+  }
+
+  /* ===== LOADING SCREEN ===== */
+  #loader {
+    position: fixed;
+    inset: 0;
+    background: var(--ink);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.8s ease;
+  }
+  #loader .loader-emblem {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    letter-spacing: 6px;
+    color: var(--gold);
+    margin-top: 2rem;
+    opacity: 0;
+    animation: fadeIn 1s 0.5s forwards;
+  }
+  .loader-ring {
+    width: 80px; height: 80px;
+    border: 1px solid rgba(201,151,58,0.2);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 1.5s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes fadeIn { to { opacity: 1; } }
+  @keyframes fadeUp { from { opacity:0; transform: translateY(30px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeInSlow { from { opacity:0; } to { opacity:1; } }
+  @keyframes slideDown { from { transform: scaleY(1); } to { transform: scaleY(0); } }
+
+  /* ===== NAVIGATION ===== */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.5rem 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(to bottom, rgba(26,20,16,0.95) 0%, transparent 100%);
+  }
+  .nav-logo {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 5px;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+  .nav-links a {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: var(--parchment-dark);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.3s;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -3px; left: 0; right: 0;
+    height: 1px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transition: transform 0.3s;
+  }
+  .nav-links a:hover { color: var(--gold); }
+  .nav-links a:hover::after { transform: scaleX(1); }
+
+  /* ===== HERO ===== */
+  #hero {
+    height: 100vh;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 100%, rgba(139,26,26,0.3) 0%, transparent 60%),
+      radial-gradient(ellipse at 50% 0%, rgba(201,151,58,0.1) 0%, transparent 50%),
+      var(--ink);
+  }
+  .arabesque {
+    position: absolute;
+    inset: 0;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpath d='M40 0 Q50 10 40 20 Q30 10 40 0Z M40 20 Q50 30 60 20 Q50 10 40 20Z M60 20 Q70 30 80 20 Q70 10 60 20Z M0 20 Q10 30 20 20 Q10 10 0 20Z M20 20 Q30 30 40 20 Q30 10 20 20Z M40 40 Q50 50 60 40 Q50 30 40 40Z M0 40 Q10 50 20 40 Q10 30 0 40Z M60 40 Q70 50 80 40 Q70 30 60 40Z M20 40 Q30 50 40 40 Q30 30 20 40Z M40 60 Q50 70 60 60 Q50 50 40 60Z M0 60 Q10 70 20 60 Q10 50 0 60Z M60 60 Q70 70 80 60 Q70 50 60 60Z M20 60 Q30 70 40 60 Q30 50 20 60Z M40 80 Q50 90 60 80 Q50 70 40 80Z M0 80 Q10 90 20 80 Q10 70 0 80Z M60 80 Q70 90 80 80 Q70 70 60 80Z M20 80 Q30 90 40 80 Q30 70 20 80Z' fill='%23C9973A'/%3E%3C/svg%3E");
+  }
+
+  /* Mosque silhouette SVG */
+  .mosque-silhouette {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    width: 100%;
+    opacity: 0.12;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    animation: fadeUp 1.2s 0.8s both;
+  }
+  .hero-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 8px;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+  }
+  .hero-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(3rem, 7vw, 6rem);
+    font-weight: 600;
+    color: var(--parchment);
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+  }
+  .hero-title span {
+    color: var(--gold);
+  }
+  .hero-subtitle {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: clamp(1rem, 2.5vw, 1.4rem);
+    color: var(--stone);
+    margin: 1rem 0 2.5rem;
+    letter-spacing: 1px;
+  }
+  .hero-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+    color: var(--gold);
+    font-size: 20px;
+  }
+  .hero-divider::before, .hero-divider::after {
+    content: '';
+    flex: 1;
+    max-width: 120px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold));
+  }
+  .hero-divider::before { background: linear-gradient(to left, transparent, var(--gold)); }
+
+  .btn-primary {
+    display: inline-block;
+    padding: 1rem 3rem;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+    z-index: -1;
+  }
+  .btn-primary:hover { color: var(--ink); }
+  .btn-primary:hover::before { transform: scaleX(1); }
+
+  /* ===== SECTIONS COMMON ===== */
+  section {
+    padding: 8rem 0;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 3rem;
+  }
+  .section-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 6px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 400;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+  }
+  .ornament {
+    color: var(--gold);
+    font-size: 24px;
+    margin: 1.5rem 0;
+    opacity: 0.7;
+  }
+
+  /* ===== EXHIBITIONS GRID ===== */
+  #exhibitions { background: var(--ink); }
+  .exhibitions-header { text-align: center; margin-bottom: 5rem; }
+  .exhibition-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+  }
+  .exhibition-card {
+    position: relative;
+    aspect-ratio: 3/4;
+    overflow: hidden;
+    transition: transform 0.4s ease;
+  }
+  .exhibition-card:first-child {
+    grid-row: span 2;
+    aspect-ratio: auto;
+  }
+  .card-bg {
+    position: absolute;
+    inset: 0;
+    transition: transform 0.6s ease;
+  }
+  .exhibition-card:hover .card-bg { transform: scale(1.05); }
+
+  .card-bg-1 { background: linear-gradient(135deg, #2C1810 0%, #8B1A1A 50%, #C9973A 100%); }
+  .card-bg-2 { background: linear-gradient(135deg, #0A1628 0%, #1E5799 100%); }
+  .card-bg-3 { background: linear-gradient(135deg, #0D2B1A 0%, #1A7A6E 100%); }
+  .card-bg-4 { background: linear-gradient(135deg, #2A1E0A 0%, #8B6914 100%); }
+  .card-bg-5 { background: linear-gradient(135deg, #1A0A1A 0%, #6B1A6B 100%); }
+
+  .card-pattern {
+    position: absolute;
+    inset: 0;
+    opacity: 0.1;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='20' fill='none' stroke='%23fff' stroke-width='0.5'/%3E%3Ccircle cx='30' cy='30' r='10' fill='none' stroke='%23fff' stroke-width='0.5'/%3E%3Cline x1='10' y1='30' x2='50' y2='30' stroke='%23fff' stroke-width='0.5'/%3E%3Cline x1='30' y1='10' x2='30' y2='50' stroke='%23fff' stroke-width='0.5'/%3E%3C/svg%3E");
+  }
+
+  .card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(26,20,16,0.95) 0%, rgba(26,20,16,0.2) 60%, transparent 100%);
+  }
+  .card-content {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 2rem;
+    transform: translateY(20px);
+    transition: transform 0.4s ease;
+  }
+  .exhibition-card:hover .card-content { transform: translateY(0); }
+  .card-tag {
+    display: inline-block;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 4px;
+    color: var(--gold);
+    border: 1px solid rgba(201,151,58,0.4);
+    padding: 4px 10px;
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+  }
+  .card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.3rem;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+    color: var(--parchment);
+  }
+  .card-subtitle {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 0.9rem;
+    color: var(--stone);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.4s 0.1s ease;
+  }
+  .exhibition-card:hover .card-subtitle { opacity: 1; transform: translateY(0); }
+  .card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 1rem;
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-decoration: none;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.3s 0.1s;
+  }
+  .exhibition-card:hover .card-link { opacity: 1; }
+
+  /* ===== INTERACTIVE GALLERY ===== */
+  #gallery {
+    background: linear-gradient(to bottom, var(--ink) 0%, #120C08 100%);
+    position: relative;
+  }
+  .gallery-header { text-align: center; margin-bottom: 4rem; }
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3px;
+    margin-bottom: 4rem;
+  }
+  .gallery-item {
+    aspect-ratio: 1;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  .gallery-item:nth-child(3) { grid-column: span 2; grid-row: span 2; aspect-ratio: auto; }
+  .gallery-item-bg {
+    position: absolute;
+    inset: 0;
+    transition: transform 0.5s ease;
+  }
+  .gallery-item:hover .gallery-item-bg { transform: scale(1.08); }
+  .gallery-item-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(26,20,16,0);
+    transition: background 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .gallery-item:hover .gallery-item-overlay { background: rgba(26,20,16,0.5); }
+  .gallery-item-label {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--parchment);
+    text-transform: uppercase;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    text-align: center;
+    padding: 0 1rem;
+  }
+  .gallery-item:hover .gallery-item-label { opacity: 1; transform: translateY(0); }
+
+  /* Artifact colors */
+  .g1 { background: linear-gradient(135deg, #3D1A05 0%, #8B4513 100%); }
+  .g2 { background: linear-gradient(135deg, #051A3D 0%, #1A4A8B 100%); }
+  .g3 { background: linear-gradient(135deg, #1A0500 0%, #8B1A1A 40%, #C9973A 100%); }
+  .g4 { background: linear-gradient(135deg, #0A1A0A 0%, #2A6B2A 100%); }
+  .g5 { background: linear-gradient(135deg, #1A1A05 0%, #6B6B1A 100%); }
+  .g6 { background: linear-gradient(135deg, #1A051A 0%, #6B1A6B 100%); }
+  .g7 { background: linear-gradient(135deg, #05101A 0%, #1A5B7A 100%); }
+
+  /* Artifact SVG illustration areas */
+  .artifact-svg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+
+  /* ===== TIMELINE ===== */
+  #timeline { background: #0E0A07; }
+  .timeline-header { text-align: center; margin-bottom: 5rem; }
+  .timeline-track {
+    position: relative;
+    padding: 0 0 4rem;
+  }
+  .timeline-line {
+    position: absolute;
+    left: 50%;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--gold) 10%, var(--gold) 90%, transparent);
+    transform: translateX(-50%);
+  }
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 5rem;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s ease;
+  }
+  .timeline-item.visible { opacity: 1; transform: translateY(0); }
+  .timeline-item:nth-child(odd) .timeline-text { grid-column: 1; text-align: right; }
+  .timeline-item:nth-child(odd) .timeline-image { grid-column: 3; }
+  .timeline-item:nth-child(even) .timeline-text { grid-column: 3; text-align: left; order: 3; }
+  .timeline-item:nth-child(even) .timeline-image { grid-column: 1; order: 1; }
+  .timeline-dot {
+    width: 14px; height: 14px;
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    background: var(--ink);
+    position: relative;
+    z-index: 2;
+    grid-column: 2;
+    justify-self: center;
+    box-shadow: 0 0 20px rgba(201,151,58,0.4);
+  }
+  .timeline-year {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+  .timeline-event {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+  .timeline-desc {
+    font-size: 0.95rem;
+    color: var(--stone);
+    line-height: 1.7;
+  }
+  .timeline-image-box {
+    height: 140px;
+    border: 1px solid rgba(201,151,58,0.2);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ===== COLLECTION VIEWER ===== */
+  #collection { background: var(--ink); }
+  .collection-header { text-align: center; margin-bottom: 4rem; }
+  .collection-filter {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    padding: 0.6rem 1.8rem;
+    border: 1px solid rgba(201,151,58,0.3);
+    background: transparent;
+    color: var(--stone);
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    transition: all 0.3s;
+  }
+  .filter-btn.active, .filter-btn:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: rgba(201,151,58,0.05);
+  }
+  .artifact-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+  .artifact-card {
+    background: #120C08;
+    border: 1px solid rgba(201,151,58,0.1);
+    transition: all 0.4s ease;
+    overflow: hidden;
+  }
+  .artifact-card:hover {
+    border-color: rgba(201,151,58,0.4);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .artifact-image {
+    height: 220px;
+    position: relative;
+    overflow: hidden;
+  }
+  .artifact-image-bg {
+    position: absolute;
+    inset: 0;
+    transition: transform 0.5s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .artifact-card:hover .artifact-image-bg { transform: scale(1.05); }
+  .artifact-info {
+    padding: 1.5rem;
+    border-top: 1px solid rgba(201,151,58,0.1);
+  }
+  .artifact-period {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 4px;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+  }
+  .artifact-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    margin-bottom: 0.4rem;
+  }
+  .artifact-origin {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--stone);
+  }
+  .artifact-card.hidden { display: none; }
+
+  /* ===== VISIT SECTION ===== */
+  #visit {
+    background: linear-gradient(to bottom, #0E0A07 0%, var(--ink) 100%);
+  }
+  .visit-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: center;
+  }
+  .visit-info h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 2.5rem;
+    font-weight: 400;
+    margin-bottom: 2rem;
+  }
+  .visit-detail {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid rgba(201,151,58,0.1);
+  }
+  .visit-icon {
+    width: 40px; height: 40px;
+    border: 1px solid rgba(201,151,58,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .visit-detail-label {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+  .visit-detail-text {
+    font-size: 0.95rem;
+    color: var(--parchment-dark);
+    line-height: 1.6;
+  }
+  .map-placeholder {
+    aspect-ratio: 4/3;
+    background: #0A0806;
+    border: 1px solid rgba(201,151,58,0.2);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ===== MODAL ===== */
+  #modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,8,6,0.9);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s;
+    backdrop-filter: blur(4px);
+  }
+  #modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: #1A1208;
+    border: 1px solid rgba(201,151,58,0.3);
+    max-width: 700px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    transform: translateY(30px);
+    transition: transform 0.4s;
+  }
+  #modal-overlay.open .modal { transform: translateY(0); }
+  .modal-header {
+    padding: 2.5rem;
+    border-bottom: 1px solid rgba(201,151,58,0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .modal-body { padding: 2.5rem; }
+  .modal-image {
+    height: 280px;
+    margin: -2.5rem -2.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-close {
+    background: none;
+    border: 1px solid rgba(201,151,58,0.3);
+    color: var(--gold);
+    font-size: 18px;
+    width: 36px; height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .modal-close:hover { background: rgba(201,151,58,0.1); }
+  .modal-period {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .modal-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.8rem;
+    font-weight: 400;
+  }
+  .modal-desc {
+    font-size: 1rem;
+    color: var(--parchment-dark);
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+  }
+  .modal-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    border-top: 1px solid rgba(201,151,58,0.15);
+    padding-top: 1.5rem;
+  }
+  .meta-item { }
+  .meta-label {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+  .meta-value { font-size: 0.9rem; color: var(--parchment-dark); }
+
+  /* ===== FOOTER ===== */
+  footer {
+    background: #0A0806;
+    padding: 4rem 0;
+    border-top: 1px solid rgba(201,151,58,0.1);
+    text-align: center;
+  }
+  .footer-logo {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+  .footer-sub {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    color: var(--stone);
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+  }
+  .footer-links {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 3rem;
+  }
+  .footer-links a {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--stone);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+  .footer-links a:hover { color: var(--gold); }
+  .footer-copy {
+    font-size: 0.8rem;
+    color: rgba(140,123,107,0.4);
+    letter-spacing: 1px;
+  }
+
+  /* ===== SCROLL ANIMATIONS ===== */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ===== SVG ILLUSTRATIONS ===== */
+  .svg-artifact { width: 80%; max-width: 160px; height: auto; opacity: 0.85; }
+
+  @media (max-width: 768px) {
+    .exhibition-grid { grid-template-columns: 1fr; }
+    .gallery-grid { grid-template-columns: repeat(2,1fr); }
+    .artifact-grid { grid-template-columns: 1fr; }
+    .visit-grid { grid-template-columns: 1fr; }
+    .timeline-line { left: 30px; }
+    .timeline-item { grid-template-columns: auto 1fr; }
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    .container { padding: 0 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div id="cursor"></div>
+<div id="cursor-dot"></div>
+
+<!-- Loading Screen -->
+<div id="loader">
+  <div class="loader-ring"></div>
+  <div class="loader-emblem">The Ottoman Museum</div>
+</div>
+
+<!-- Navigation -->
+<nav>
+  <div class="nav-logo">The Ottoman Museum</div>
+  <ul class="nav-links">
+    <li><a href="#exhibitions">Exhibitions</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#timeline">History</a></li>
+    <li><a href="#collection">Collection</a></li>
+    <li><a href="#visit">Visit</a></li>
+  </ul>
+</nav>
+
+<!-- Hero -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="arabesque"></div>
+
+  <!-- Mosque Silhouette -->
+  <svg class="mosque-silhouette" viewBox="0 0 1400 300" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet">
+    <path d="M0 300 L0 200 L80 200 L80 180 L100 180 L100 160 L120 100 L140 160 L140 180 L160 180 L160 200 L200 200 L200 180 L220 180 L220 100 L230 60 L240 40 L245 20 L250 15 L255 20 L260 40 L270 60 L280 100 L280 180 L300 180 L300 200 L340 200 L340 180 L360 180 L360 160 L380 100 L400 160 L400 180 L420 180 L420 200 L500 200 L500 240 L550 240 L550 200 L600 200 L600 180 L620 180 L620 100 L640 50 L650 30 L660 50 L680 100 L680 180 L700 180 L700 200 L750 200 L760 160 L780 120 L800 160 L810 200 L860 200 L860 180 L880 180 L880 100 L900 50 L910 30 L920 50 L940 100 L940 180 L960 180 L960 200 L1050 200 L1060 240 L1070 200 L1150 200 L1150 180 L1170 180 L1170 100 L1190 50 L1200 30 L1210 50 L1230 100 L1230 180 L1250 180 L1250 200 L1300 200 L1300 220 L1350 220 L1350 200 L1400 200 L1400 300 Z" fill="rgba(201,151,58,0.6)"/>
+  </svg>
+
+  <div class="hero-content">
+    <p class="hero-eyebrow">Istanbul · Established 1923</p>
+    <h1 class="hero-title">The <span>Ottoman</span><br>Museum</h1>
+    <p class="hero-subtitle">Six centuries of empire, art & civilization</p>
+    <div class="hero-divider">✦</div>
+    <a href="#exhibitions" class="btn-primary">Enter the Museum</a>
+  </div>
+</section>
+
+<!-- Exhibitions -->
+<section id="exhibitions">
+  <div class="container">
+    <div class="exhibitions-header reveal">
+      <p class="section-eyebrow">Current exhibitions</p>
+      <h2 class="section-title">Galleries of<br>the Empire</h2>
+    </div>
+    <div class="exhibition-grid reveal">
+      <div class="exhibition-card" data-id="1">
+        <div class="card-bg card-bg-1"></div>
+        <div class="card-pattern"></div>
+        <div class="card-overlay"></div>
+        <div class="card-content">
+          <div class="card-tag">Permanent</div>
+          <div class="card-title">The Sultans' Court</div>
+          <div class="card-subtitle">Throne rooms, robes of state, and imperial regalia from Topkapı Palace</div>
+          <a href="#" class="card-link" onclick="openModal('sultans'); return false;">Explore Hall →</a>
+        </div>
+        <!-- Decorative SVG -->
+        <svg style="position:absolute;top:2rem;right:2rem;opacity:0.15;width:80px" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 5 L60 30 L90 30 L67 48 L77 75 L50 57 L23 75 L33 48 L10 30 L40 30 Z" fill="none" stroke="#C9973A" stroke-width="1"/>
+          <circle cx="50" cy="60" r="30" fill="none" stroke="#C9973A" stroke-width="0.5"/>
+          <circle cx="50" cy="60" r="15" fill="none" stroke="#C9973A" stroke-width="0.5"/>
+        </svg>
+      </div>
+
+      <div class="exhibition-card" data-id="2" onclick="openModal('calligraphy')">
+        <div class="card-bg card-bg-2"></div>
+        <div class="card-pattern"></div>
+        <div class="card-overlay"></div>
+        <div class="card-content">
+          <div class="card-tag">Gallery II</div>
+          <div class="card-title">Sacred Calligraphy</div>
+          <div class="card-subtitle">The divine art of the written word</div>
+          <span class="card-link">View Gallery →</span>
+        </div>
+      </div>
+
+      <div class="exhibition-card" data-id="3" onclick="openModal('iznik')">
+        <div class="card-bg card-bg-3"></div>
+        <div class="card-pattern"></div>
+        <div class="card-overlay"></div>
+        <div class="card-content">
+          <div class="card-tag">Gallery III</div>
+          <div class="card-title">İznik Ceramics</div>
+          <div class="card-subtitle">Master tilework from the golden age</div>
+          <span class="card-link">View Gallery →</span>
+        </div>
+      </div>
+
+      <div class="exhibition-card" data-id="4" onclick="openModal('military')">
+        <div class="card-bg card-bg-4"></div>
+        <div class="card-pattern"></div>
+        <div class="card-overlay"></div>
+        <div class="card-content">
+          <div class="card-tag">Gallery IV</div>
+          <div class="card-title">Arms & Armour</div>
+          <div class="card-subtitle">Weapons of the Janissaries and cavalry</div>
+          <span class="card-link">View Gallery →</span>
+        </div>
+      </div>
+
+      <div class="exhibition-card" data-id="5" onclick="openModal('textiles')">
+        <div class="card-bg card-bg-5"></div>
+        <div class="card-pattern"></div>
+        <div class="card-overlay"></div>
+        <div class="card-content">
+          <div class="card-tag">New · 2025</div>
+          <div class="card-title">Imperial Textiles</div>
+          <div class="card-subtitle">Silks, brocades and Bursa velvets from the palace looms</div>
+          <span class="card-link">View Gallery →</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Gallery -->
+<section id="gallery">
+  <div class="container">
+    <div class="gallery-header reveal">
+      <p class="section-eyebrow">Highlights</p>
+      <h2 class="section-title">Masterworks of<br>the Collection</h2>
+    </div>
+    <div class="gallery-grid reveal">
+      <div class="gallery-item" onclick="openModal('koran')">
+        <div class="gallery-item-bg g1"></div>
+        <div class="artifact-svg">
+          <svg class="svg-artifact" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+            <rect x="15" y="10" width="70" height="100" rx="3" fill="none" stroke="#C9973A" stroke-width="1"/>
+            <rect x="20" y="15" width="60" height="90" rx="2" fill="none" stroke="rgba(201,151,58,0.4)" stroke-width="0.5"/>
+            <line x1="30" y1="35" x2="70" y2="35" stroke="#C9973A" stroke-width="0.5"/>
+            <line x1="30" y1="45" x2="70" y2="45" stroke="#C9973A" stroke-width="0.5"/>
+            <line x1="30" y1="55" x2="60" y2="55" stroke="#C9973A" stroke-width="0.5"/>
+            <path d="M40 70 Q50 65 60 70 Q50 75 40 70Z" fill="#C9973A" opacity="0.6"/>
+          </svg>
+        </div>
+        <div class="gallery-item-overlay">
+          <div class="gallery-item-label">Illuminated Quran<br>16th Century</div>
+        </div>
+      </div>
+
+      <div class="gallery-item" onclick="openModal('helmet')">
+        <div class="gallery-item-bg g2"></div>
+        <div class="artifact-svg">
+          <svg class="svg-artifact" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50 10 Q80 20 80 55 L80 80 Q80 90 50 95 Q20 90 20 80 L20 55 Q20 20 50 10Z" fill="none" stroke="#C9973A" stroke-width="1"/>
+            <path d="M50 10 L50 8" stroke="#C9973A" stroke-width="2"/>
+            <line x1="20" y1="80" x2="80" y2="80" stroke="#C9973A" stroke-width="0.5"/>
+            <ellipse cx="50" cy="50" rx="15" ry="20" fill="none" stroke="rgba(201,151,58,0.3)" stroke-width="0.5"/>
+          </svg>
+        </div>
+        <div class="gallery-item-overlay">
+          <div class="gallery-item-label">Sultan's Ceremonial Helmet</div>
+        </div>
+      </div>
+
+      <div class="gallery-item" onclick="openModal('tile')">
+        <div class="gallery-item-bg g3"></div>
+        <div class="artifact-svg">
+          <svg class="svg-artifact" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="10" width="180" height="180" fill="none" stroke="#C9973A" stroke-width="1"/>
+            <circle cx="100" cy="100" r="70" fill="none" stroke="#C9973A" stroke-width="0.8"/>
+            <circle cx="100" cy="100" r="40" fill="none" stroke="#C9973A" stroke-width="0.8"/>
+            <circle cx="100" cy="100" r="10" fill="#C9973A" opacity="0.5"/>
+            <line x1="30" y1="100" x2="170" y2="100" stroke="#C9973A" stroke-width="0.5"/>
+            <line x1="100" y1="30" x2="100" y2="170" stroke="#C9973A" stroke-width="0.5"/>
+            <path d="M100 30 Q130 60 170 100 Q130 140 100 170 Q70 140 30 100 Q70 60 100 30Z" fill="none" stroke="rgba(201,151,58,0.3)" stroke-width="0.5"/>
+            <path d="M100 50 Q120 75 140 100 Q120 125 100 150 Q80 125 60 100 Q80 75 100 50Z" fill="rgba(139,26,26,0.3)"/>
+          </svg>
+        </div>
+        <div class="gallery-item-overlay">
+          <div class="gallery-item-label">İznik Tile Panel<br>c. 1575</div>
+        </div>
+      </div>
+
+      <div class="gallery-item" onclick="openModal('carpet')">
+        <div class="gallery-item-bg g4"></div>
+        <div class="artifact-svg">
+          <svg class="svg-artifact" viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="10" width="80" height="110" fill="none" stroke="#C9973A" stroke-width="1"/>
+            <rect x="15" y="15" width="70" height="100" fill="none" stroke="rgba(201,151,58,0.4)" stroke-width="0.5"/>
+            <rect x="20" y="20" width="60" height="90" fill="none" stroke="rgba(201,151,58,0.2)" stroke-width="0.5"/>
+            <circle cx="50" cy="65" r="20" fill="none" stroke="#C9973A" stroke-width="0.7"/>
+            <circle cx="50" cy="65" r="10" fill="none" stroke="#C9973A" stroke-width="0.5"/>
+            <path d="M35 50 L65 50 L65 80 L35 80Z" fill="none" stroke="rgba(201,151,58,0.4)" stroke-width="0.5"/>
+          </svg>
+        </div>
+        <div class="gallery-item-overlay">
+          <div class="gallery-item-label">Ushak Prayer Carpet</div>
+        </div>
+      </div>
+
+      <div class="gallery-item" onclick="openModal('dagger')">
+        <div class="gallery-item-bg g5"></div>
+        <div class="artifact-svg">
+          <svg class="svg-artifact" viewBox="0 0 60 160" xmlns="http://www.w3.org/2000/svg">
+            <path d="M30 10 L38 80 L30 150 L22 80 Z" fill="none" stroke="#C9973A" stroke-width="1"/>
+            <rect x="18" y="75" width="24" height="5" rx="1" fill="rgba(201,151,58,0.3)" stroke="#C9973A" stroke-width="0.5"/>
+            <rect x="22" y="80" width="16" height="30" rx="2" fill="none" stroke="#C9973A" stroke-width="0.7"/>
+            <line x1="30" y1="10" x2="30" y2="150" stroke="rgba(201,151,58,0.2)" stroke-width="0.5"/>
+          </svg>
+        </div>
+        <div class="gallery-item-overlay">
+          <div class="gallery-item-label">Jewelled Janbiya Dagger</div>
+        </div>
+      </div>
+
+      <div class="gallery-item" onclick="openModal('candlestick')">
+        <div class="gallery-item-bg g6"></div>
+        <div class="artifact-svg">
+          <svg class="svg-artifact" viewBox="0 0 80 160" xmlns="http://www.w3.org/2000/svg">
+            <path d="M40 10 Q45 15 45 25 Q45 35 40 40 Q35 35 35 25 Q35 15 40 10Z" fill="none" stroke="#C9973A" stroke-width="0.8"/>
+            <rect x="37" y="40" width="6" height="70" fill="none" stroke="#C9973A" stroke-width="0.8"/>
+            <ellipse cx="40" cy="115" rx="20" ry="5" fill="none" stroke="#C9973A" stroke-width="0.8"/>
+            <ellipse cx="40" cy="130" rx="30" ry="7" fill="none" stroke="#C9973A" stroke-width="0.8"/>
+          </svg>
+        </div>
+        <div class="gallery-item-overlay">
+          <div class="gallery-item-label">Silver Mosque Candlestick</div>
+        </div>
+      </div>
+
+      <div class="gallery-item" onclick="openModal('miniature')">
+        <div class="gallery-item-bg g7"></div>
+        <div class="artifact-svg">
+          <svg class="svg-artifact" viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg">
+            <rect x="5" y="5" width="90" height="130" rx="2" fill="none" stroke="#C9973A" stroke-width="1"/>
+            <rect x="10" y="10" width="80" height="80" fill="none" stroke="rgba(201,151,58,0.4)" stroke-width="0.5"/>
+            <circle cx="50" cy="50" r="25" fill="none" stroke="#C9973A" stroke-width="0.5"/>
+            <path d="M35 65 Q50 40 65 65" fill="rgba(201,151,58,0.1)" stroke="#C9973A" stroke-width="0.5"/>
+            <line x1="15" y1="100" x2="85" y2="100" stroke="rgba(201,151,58,0.3)" stroke-width="0.5"/>
+            <line x1="15" y1="112" x2="75" y2="112" stroke="rgba(201,151,58,0.2)" stroke-width="0.5"/>
+            <line x1="15" y1="124" x2="65" y2="124" stroke="rgba(201,151,58,0.2)" stroke-width="0.5"/>
+          </svg>
+        </div>
+        <div class="gallery-item-overlay">
+          <div class="gallery-item-label">Ottoman Miniature Painting</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Timeline -->
+<section id="timeline">
+  <div class="container">
+    <div class="timeline-header reveal">
+      <p class="section-eyebrow">History</p>
+      <h2 class="section-title">Six Centuries<br>of Empire</h2>
+      <p class="ornament">✦</p>
+    </div>
+    <div class="timeline-track">
+      <div class="timeline-line"></div>
+
+      <div class="timeline-item">
+        <div class="timeline-text">
+          <div class="timeline-year">1299</div>
+          <div class="timeline-event">Founding of the Empire</div>
+          <div class="timeline-desc">Osman I establishes the Ottoman dynasty in Söğüt, laying the foundations of what would become one of the longest-lasting empires in history.</div>
+        </div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-image">
+          <div class="timeline-image-box">
+            <svg viewBox="0 0 200 140" style="width:100%;height:100%">
+              <rect width="200" height="140" fill="#1A0D05"/>
+              <path d="M100 20 L120 60 L170 60 L132 85 L148 130 L100 105 L52 130 L68 85 L30 60 L80 60 Z" fill="none" stroke="#C9973A" stroke-width="1"/>
+              <circle cx="100" cy="70" r="40" fill="none" stroke="rgba(201,151,58,0.2)" stroke-width="0.5"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-text">
+          <div class="timeline-year">1453</div>
+          <div class="timeline-event">Conquest of Constantinople</div>
+          <div class="timeline-desc">Sultan Mehmed II captures Constantinople, renaming it Istanbul and transforming Hagia Sophia into an imperial mosque. The Byzantine era ends.</div>
+        </div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-image">
+          <div class="timeline-image-box">
+            <svg viewBox="0 0 200 140" style="width:100%;height:100%">
+              <rect width="200" height="140" fill="#0A0518"/>
+              <path d="M100 10 Q130 30 130 70 L130 100 Q130 115 100 120 Q70 115 70 100 L70 70 Q70 30 100 10Z" fill="none" stroke="#C9973A" stroke-width="1"/>
+              <path d="M60 120 L80 110 L100 120 L120 110 L140 120" stroke="#C9973A" stroke-width="0.5" fill="none"/>
+              <circle cx="100" cy="70" r="20" fill="none" stroke="rgba(201,151,58,0.4)" stroke-width="0.5"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-text">
+          <div class="timeline-year">1520</div>
+          <div class="timeline-event">The Magnificent Century</div>
+          <div class="timeline-desc">Suleiman the Magnificent ascends the throne, ushering in the peak of Ottoman power, art, law, and architecture.</div>
+        </div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-image">
+          <div class="timeline-image-box">
+            <svg viewBox="0 0 200 140" style="width:100%;height:100%">
+              <rect width="200" height="140" fill="#1A0C00"/>
+              <ellipse cx="100" cy="90" rx="70" ry="40" fill="none" stroke="#C9973A" stroke-width="0.8"/>
+              <path d="M100 10 L100 90" stroke="#C9973A" stroke-width="0.8"/>
+              <path d="M100 10 Q130 50 170 50" stroke="rgba(201,151,58,0.4)" stroke-width="0.5" fill="none"/>
+              <path d="M100 10 Q70 50 30 50" stroke="rgba(201,151,58,0.4)" stroke-width="0.5" fill="none"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-text">
+          <div class="timeline-year">1683</div>
+          <div class="timeline-event">The Siege of Vienna</div>
+          <div class="timeline-desc">The failed siege of Vienna marks the turning point. Ottoman expansion reaches its westernmost limit; the long retreat from Europe begins.</div>
+        </div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-image">
+          <div class="timeline-image-box">
+            <svg viewBox="0 0 200 140" style="width:100%;height:100%">
+              <rect width="200" height="140" fill="#0F0A05"/>
+              <rect x="40" y="20" width="120" height="90" fill="none" stroke="#C9973A" stroke-width="0.8"/>
+              <path d="M40 20 L100 5 L160 20" fill="none" stroke="#C9973A" stroke-width="0.8"/>
+              <line x1="100" y1="5" x2="100" y2="100" stroke="rgba(201,151,58,0.3)" stroke-width="0.5"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-text">
+          <div class="timeline-year">1922</div>
+          <div class="timeline-event">End of the Sultanate</div>
+          <div class="timeline-desc">Mehmed VI, the last Sultan, departs Istanbul in exile. The six-century empire comes to its end. The Republic of Turkey is born the following year.</div>
+        </div>
+        <div class="timeline-dot"></div>
+        <div class="timeline-image">
+          <div class="timeline-image-box">
+            <svg viewBox="0 0 200 140" style="width:100%;height:100%">
+              <rect width="200" height="140" fill="#0A0808"/>
+              <circle cx="100" cy="70" r="50" fill="none" stroke="#C9973A" stroke-width="0.5"/>
+              <circle cx="100" cy="70" r="35" fill="none" stroke="rgba(201,151,58,0.3)" stroke-width="0.5"/>
+              <circle cx="100" cy="70" r="5" fill="#C9973A" opacity="0.4"/>
+              <path d="M50 70 Q75 40 100 70 Q125 100 150 70" fill="none" stroke="#C9973A" stroke-width="0.8"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Collection -->
+<section id="collection">
+  <div class="container">
+    <div class="collection-header reveal">
+      <p class="section-eyebrow">Permanent Collection</p>
+      <h2 class="section-title">Artifacts of<br>the Empire</h2>
+    </div>
+    <div class="collection-filter reveal">
+      <button class="filter-btn active" data-filter="all">All Objects</button>
+      <button class="filter-btn" data-filter="weapons">Arms</button>
+      <button class="filter-btn" data-filter="ceramics">Ceramics</button>
+      <button class="filter-btn" data-filter="manuscripts">Manuscripts</button>
+      <button class="filter-btn" data-filter="textiles">Textiles</button>
+      <button class="filter-btn" data-filter="jewellery">Jewellery</button>
+    </div>
+    <div class="artifact-grid reveal" id="artifactGrid">
+      <!-- Generated by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- Visit -->
+<section id="visit">
+  <div class="container">
+    <div class="visit-grid">
+      <div class="visit-info reveal">
+        <p class="section-eyebrow">Plan your visit</p>
+        <h2 style="font-family:'Cinzel',serif;font-size:2.5rem;font-weight:400;margin-bottom:2rem;">Opening<br>the Doors</h2>
+        <div class="visit-detail">
+          <div class="visit-icon">◷</div>
+          <div>
+            <div class="visit-detail-label">Opening Hours</div>
+            <div class="visit-detail-text">Tuesday – Sunday: 09:00 – 19:00<br>Monday: Closed<br>Last entry 18:15</div>
+          </div>
+        </div>
+        <div class="visit-detail">
+          <div class="visit-icon">⊙</div>
+          <div>
+            <div class="visit-detail-label">Location</div>
+            <div class="visit-detail-text">Sultanahmet Square, Fatih<br>34122 Istanbul, Türkiye</div>
+          </div>
+        </div>
+        <div class="visit-detail">
+          <div class="visit-icon">◈</div>
+          <div>
+            <div class="visit-detail-label">Admission</div>
+            <div class="visit-detail-text">Adults: 250 TL · Students: 120 TL<br>Under 12: Free · Museum Pass accepted</div>
+          </div>
+        </div>
+        <div class="visit-detail">
+          <div class="visit-icon">⊕</div>
+          <div>
+            <div class="visit-detail-label">Audio Guides</div>
+            <div class="visit-detail-text">Available in 12 languages<br>Free with museum app</div>
+          </div>
+        </div>
+        <div style="margin-top:2rem">
+          <a href="#" class="btn-primary">Book Tickets</a>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="map-placeholder">
+          <svg viewBox="0 0 400 300" style="width:100%;height:100%" xmlns="http://www.w3.org/2000/svg">
+            <rect width="400" height="300" fill="#0A0806"/>
+            <!-- Streets -->
+            <line x1="0" y1="150" x2="400" y2="150" stroke="rgba(201,151,58,0.15)" stroke-width="8"/>
+            <line x1="200" y1="0" x2="200" y2="300" stroke="rgba(201,151,58,0.15)" stroke-width="8"/>
+            <line x1="0" y1="80" x2="400" y2="80" stroke="rgba(201,151,58,0.08)" stroke-width="5"/>
+            <line x1="0" y1="220" x2="400" y2="220" stroke="rgba(201,151,58,0.08)" stroke-width="5"/>
+            <line x1="100" y1="0" x2="100" y2="300" stroke="rgba(201,151,58,0.08)" stroke-width="5"/>
+            <line x1="300" y1="0" x2="300" y2="300" stroke="rgba(201,151,58,0.08)" stroke-width="5"/>
+            <!-- Blue Mosque block -->
+            <rect x="110" y="90" width="80" height="55" fill="rgba(201,151,58,0.05)" stroke="rgba(201,151,58,0.2)" stroke-width="0.5"/>
+            <text x="150" y="122" font-size="8" fill="rgba(201,151,58,0.5)" text-anchor="middle" font-family="Cinzel">Blue Mosque</text>
+            <!-- Museum marker -->
+            <circle cx="200" cy="150" r="12" fill="#C9973A" opacity="0.9"/>
+            <circle cx="200" cy="150" r="20" fill="none" stroke="#C9973A" stroke-width="1" opacity="0.4"/>
+            <circle cx="200" cy="150" r="30" fill="none" stroke="#C9973A" stroke-width="0.5" opacity="0.2"/>
+            <text x="200" y="154" font-size="8" fill="#0A0806" text-anchor="middle" font-weight="bold" font-family="Cinzel">M</text>
+            <text x="200" y="185" font-size="9" fill="#C9973A" text-anchor="middle" font-family="Cinzel" letter-spacing="1">Ottoman Museum</text>
+            <!-- Hagia Sophia -->
+            <rect x="215" y="110" width="60" height="40" fill="rgba(201,151,58,0.05)" stroke="rgba(201,151,58,0.15)" stroke-width="0.5"/>
+            <text x="245" y="134" font-size="7" fill="rgba(201,151,58,0.4)" text-anchor="middle" font-family="Cinzel">Hagia Sophia</text>
+            <!-- Compass -->
+            <text x="370" y="30" font-size="14" fill="rgba(201,151,58,0.4)" text-anchor="middle" font-family="Cinzel">N</text>
+            <line x1="370" y1="35" x2="370" y2="55" stroke="rgba(201,151,58,0.3)" stroke-width="1"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-logo">The Ottoman Museum</div>
+  <div class="footer-sub">Sultanahmet · Istanbul · Est. 1923</div>
+  <div class="footer-links">
+    <a href="#">About</a>
+    <a href="#">Exhibitions</a>
+    <a href="#">Education</a>
+    <a href="#">Research</a>
+    <a href="#">Shop</a>
+    <a href="#">Press</a>
+    <a href="#">Accessibility</a>
+    <a href="#">Contact</a>
+  </div>
+  <p class="footer-copy">© 2025 The Ottoman Museum · All rights reserved</p>
+</footer>
+
+<!-- Modal -->
+<div id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-content">
+    <div class="modal-image" id="modal-image"></div>
+    <div class="modal-header">
+      <div>
+        <div class="modal-period" id="modal-period"></div>
+        <div class="modal-title" id="modal-title"></div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('modal-overlay').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-desc" id="modal-desc"></div>
+      <div class="modal-meta" id="modal-meta"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Cursor
+const cursor = document.getElementById('cursor');
+const cursorDot = document.getElementById('cursor-dot');
+let mouseX = 0, mouseY = 0;
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX; mouseY = e.clientY;
+  cursorDot.style.left = mouseX + 'px';
+  cursorDot.style.top = mouseY + 'px';
+  cursor.style.left = mouseX + 'px';
+  cursor.style.top = mouseY + 'px';
+});
+document.querySelectorAll('a, button, .exhibition-card, .gallery-item, .artifact-card, .filter-btn').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+});
+
+// Loader
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const loader = document.getElementById('loader');
+    loader.style.opacity = '0';
+    setTimeout(() => loader.style.display = 'none', 800);
+  }, 1800);
+});
+
+// Scroll reveal
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal, .timeline-item').forEach(el => observer.observe(el));
+
+// Modal data
+const modalData = {
+  sultans: {
+    period: 'Permanent Exhibition · Hall I',
+    title: "The Sultans' Court",
+    desc: "Step into the gilded world of Ottoman imperial power. This gallery presents the thrones, ceremonial robes, and regalia from Topkapı Palace — the nerve centre of an empire stretching from Vienna to Baghdad. Marvel at the jewel-encrusted throne of Suleiman the Magnificent, the embroidered kaftans worn on state occasions, and the exquisite turban ornaments known as sorguc.",
+    gradient: 'linear-gradient(135deg, #2C1810 0%, #8B1A1A 60%, #C9973A 100%)',
+    meta: [
+      {l:'Dynasty', v:'House of Osman'}, {l:'Period', v:'14th–20th Century'},
+      {l:'Objects', v:'Over 340 artefacts'}, {l:'Location', v:'Ground Floor, East Wing'}
+    ]
+  },
+  calligraphy: {
+    period: 'Gallery II · Sacred Arts',
+    title: "Sacred Calligraphy",
+    desc: "Islamic calligraphy elevated the written word to the highest form of visual art. The Ottoman court nurtured master calligraphers, known as hattat, whose work adorned Qurans, imperial firmans, and mosque walls. This gallery presents masterworks in the six classical scripts: Thuluth, Naskh, Muhaqqaq, Riqa, Tawqi, and the distinctly Ottoman Diwani.",
+    gradient: 'linear-gradient(135deg, #051228 0%, #1E5799 80%, #4A90D9 100%)',
+    meta: [
+      {l:'Scripts', v:'6 classical styles'}, {l:'Period', v:'15th–19th Century'},
+      {l:'Objects', v:'128 works on paper'}, {l:'Location', v:'First Floor, West Wing'}
+    ]
+  },
+  iznik: {
+    period: 'Gallery III · Decorative Arts',
+    title: "İznik Ceramics",
+    desc: "Between 1550 and 1700, the workshops of İznik produced the finest ceramics the Islamic world had ever seen. The vivid cobalt blue, tomato red, and emerald green of İznik tiles adorned the great mosques of Istanbul. This gallery presents over 200 pieces — from plates and jugs to architectural panels — showing the full flowering of this extraordinary art.",
+    gradient: 'linear-gradient(135deg, #041A10 0%, #1A7A6E 80%, #30C0A8 100%)',
+    meta: [
+      {l:'Origin', v:'İznik, Anatolia'}, {l:'Peak Period', v:'1555–1620'},
+      {l:'Objects', v:'214 ceramics'}, {l:'Location', v:'First Floor, East Wing'}
+    ]
+  },
+  military: {
+    period: 'Gallery IV · Military Arts',
+    title: "Arms & Armour",
+    desc: "The Ottoman military was among the most formidable in the world for three centuries. Janissary swords, cavalry armour, jewelled daggers, and battle-scarred shields fill this dramatic gallery. Many of the pieces were personal gifts between sultans and foreign rulers, their blades etched with Quranic verses for divine protection in battle.",
+    gradient: 'linear-gradient(135deg, #1A1205 0%, #7A5A0A 80%, #C9973A 100%)',
+    meta: [
+      {l:'Corps', v:'Janissary & Cavalry'}, {l:'Period', v:'15th–18th Century'},
+      {l:'Objects', v:'189 weapons & armour'}, {l:'Location', v:'Ground Floor, North Wing'}
+    ]
+  },
+  textiles: {
+    period: 'New Exhibition · 2025',
+    title: "Imperial Textiles",
+    desc: "The palace looms of Bursa and Istanbul produced silks of breathtaking quality for the Ottoman court. This new exhibition — opening for the first time — brings together kaftans, prayer mats, tent hangings, and embroidered saddle covers. The textiles reveal not only extraordinary technical skill, but the cosmopolitan tastes of an empire that traded across three continents.",
+    gradient: 'linear-gradient(135deg, #150A1A 0%, #6B1A8B 80%, #A050D0 100%)',
+    meta: [
+      {l:'Materials', v:'Silk, Gold Thread, Velvet'}, {l:'Period', v:'16th–19th Century'},
+      {l:'Objects', v:'97 textiles & kaftans'}, {l:'Location', v:'Second Floor, New Wing'}
+    ]
+  },
+  koran: {
+    period: '16th Century · Manuscripts',
+    title: "Illuminated Quran of Suleiman",
+    desc: "Commissioned in 1547 for Sultan Suleiman the Magnificent, this Quran is considered one of the finest examples of Ottoman manuscript art. Each page border blazes with ultramarine, gold, and crimson illumination. The script was written by the master calligrapher Ahmed Karahisari in a stately Muhaqqaq hand.",
+    gradient: 'linear-gradient(135deg, #3D1A05 0%, #8B4513 100%)',
+    meta: [
+      {l:'Date', v:'AH 954 / AD 1547'}, {l:'Material', v:'Vellum, gold, pigments'},
+      {l:'Dimensions', v:'38 × 26 cm'}, {l:'Accession', v:'OTT.1923.MS.001'}
+    ]
+  },
+  helmet: {
+    period: '16th Century · Arms & Armour',
+    title: "Ceremonial Helmet of Selim II",
+    desc: "This parade helmet of Sultan Selim II was never intended for battle — it was designed to dazzle. The surface is damascened with gold arabesque patterns and set with rubies, turquoises, and emeralds. An inscription in gilded Thuluth script runs around the brow, invoking divine protection for the sultan.",
+    gradient: 'linear-gradient(135deg, #051628 0%, #1E5799 100%)',
+    meta: [
+      {l:'Date', v:'c. 1560–1570'}, {l:'Material', v:'Steel, gold, precious stones'},
+      {l:'Workshop', v:'Imperial Armoury, Istanbul'}, {l:'Accession', v:'OTT.1923.ARM.012'}
+    ]
+  },
+  tile: {
+    period: 'c. 1575 · İznik Ceramics',
+    title: "İznik Tile Panel — Rosette and Arabesque",
+    desc: "This magnificent panel of thirty-two tiles once adorned a prayer niche in a now-lost Istanbul palace. The design centres on a great rosette surrounded by spiralling arabesques in the finest cobalt blue and tomato red only achievable in İznik's peak decade between 1560 and 1590.",
+    gradient: 'linear-gradient(135deg, #1A0500 0%, #8B1A1A 40%, #C9973A 100%)',
+    meta: [
+      {l:'Date', v:'c. 1575'}, {l:'Material', v:'Fritware, underglaze'},
+      {l:'Dimensions', v:'180 × 120 cm (panel)'}, {l:'Accession', v:'OTT.1935.CER.088'}
+    ]
+  },
+  carpet: {
+    period: '17th Century · Textiles',
+    title: "Ushak Prayer Carpet",
+    desc: "Woven in the great carpet town of Ushak in western Anatolia, this prayer carpet is a rare surviving example with both a mihrab (prayer niche) design and an unusually complete border. The colours — madder red and indigo blue — remain astonishingly vivid after three hundred years.",
+    gradient: 'linear-gradient(135deg, #0A1A0A 0%, #2A6B2A 100%)',
+    meta: [
+      {l:'Date', v:'c. 1650–1680'}, {l:'Material', v:'Hand-knotted wool'},
+      {l:'Dimensions', v:'183 × 124 cm'}, {l:'Accession', v:'OTT.1945.TEX.034'}
+    ]
+  },
+  dagger: {
+    period: '18th Century · Arms & Armour',
+    title: "Jewelled Janbiya Dagger",
+    desc: "This curved janbiya dagger was a ceremonial gift from an Ottoman ambassador to the Persian Safavid court. The handle is carved from rhinoceros horn and set with cabochon rubies. The blade, of watered Damascus steel, retains its edge despite its age.",
+    gradient: 'linear-gradient(135deg, #1A1A05 0%, #6B6B1A 100%)',
+    meta: [
+      {l:'Date', v:'AH 1143 / AD 1730'}, {l:'Material', v:'Damascus steel, horn, rubies'},
+      {l:'Length', v:'32.5 cm'}, {l:'Accession', v:'OTT.1952.ARM.067'}
+    ]
+  },
+  candlestick: {
+    period: '16th Century · Metalwork',
+    title: "Silver Mosque Candlestick",
+    desc: "Cast in pure silver and engraved with continuous arabesque scrollwork, this monumental candlestick stood at the entrance to the mihrab of a now-demolished Istanbul mosque. An inscription identifies the donor as Kösem Sultan, mother of Sultan Ibrahim I.",
+    gradient: 'linear-gradient(135deg, #1A051A 0%, #6B1A6B 100%)',
+    meta: [
+      {l:'Date', v:'AH 1049 / AD 1639'}, {l:'Material', v:'Cast silver, engraved'},
+      {l:'Height', v:'112 cm'}, {l:'Accession', v:'OTT.1928.MET.003'}
+    ]
+  },
+  miniature: {
+    period: '16th Century · Manuscripts',
+    title: "Miniature: Hunting Scene from the Hünernâme",
+    desc: "Attributed to the court painter Nakkaş Osman and his workshop, this miniature from the Hünernâme (Book of Skills) depicts Sultan Murad III at the royal hunt. The composition uses the traditional Ottoman aerial perspective, with figures against a gold sky amongst lush flowering trees.",
+    gradient: 'linear-gradient(135deg, #051018 0%, #1A5B7A 100%)',
+    meta: [
+      {l:'Date', v:'AH 987 / AD 1579'}, {l:'Material', v:'Opaque watercolour, gold on paper'},
+      {l:'Dimensions', v:'34 × 26 cm'}, {l:'Accession', v:'OTT.1923.MS.019'}
+    ]
+  }
+};
+
+function openModal(id) {
+  const d = modalData[id];
+  if (!d) return;
+  document.getElementById('modal-period').textContent = d.period;
+  document.getElementById('modal-title').textContent = d.title;
+  document.getElementById('modal-desc').textContent = d.desc;
+  document.getElementById('modal-image').style.background = d.gradient;
+  const meta = document.getElementById('modal-meta');
+  meta.innerHTML = d.meta.map(m => `<div class="meta-item"><div class="meta-label">${m.l}</div><div class="meta-value">${m.v}</div></div>`).join('');
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(e) {
+  if (e.target === document.getElementById('modal-overlay')) {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.getElementById('modal-overlay').classList.remove('open');
+});
+
+// Collection artifacts
+const artifacts = [
+  { name: 'Tughra of Suleiman', period: 'c. 1550', origin: 'Istanbul', category: 'manuscripts', gradient: 'linear-gradient(135deg,#0A1220,#1E4080)', desc: 'ms' },
+  { name: 'Yataǧan Sword', period: '18th century', origin: 'Balkan workshop', category: 'weapons', gradient: 'linear-gradient(135deg,#1A1005,#704010)', desc: 'wp' },
+  { name: 'Prayer Rug', period: 'c. 1680', origin: 'Ushak', category: 'textiles', gradient: 'linear-gradient(135deg,#081A08,#205020)', desc: 'tx' },
+  { name: 'İznik Dish', period: 'c. 1560', origin: 'İznik', category: 'ceramics', gradient: 'linear-gradient(135deg,#04121A,#0A5070)', desc: 'cer' },
+  { name: 'Emerald Pendant', period: '17th century', origin: 'Imperial Treasury', category: 'jewellery', gradient: 'linear-gradient(135deg,#0A1A08,#1A600A)', desc: 'jw' },
+  { name: 'Firman of Ahmed III', period: '1710', origin: 'Topkapı Palace', category: 'manuscripts', gradient: 'linear-gradient(135deg,#1A0D00,#804A00)', desc: 'ms' },
+  { name: 'Janissary Shield', period: '16th century', origin: 'Istanbul', category: 'weapons', gradient: 'linear-gradient(135deg,#180A0A,#701A1A)', desc: 'wp' },
+  { name: 'Kaftan of Mehmed II', period: 'c. 1470', origin: 'Bursa looms', category: 'textiles', gradient: 'linear-gradient(135deg,#14041A,#601480)', desc: 'tx' },
+  { name: 'Blue Mosque Tile', period: 'c. 1616', origin: 'İznik', category: 'ceramics', gradient: 'linear-gradient(135deg,#0A0618,#201880)', desc: 'cer' },
+];
+
+function renderArtifacts(filter) {
+  const grid = document.getElementById('artifactGrid');
+  grid.innerHTML = artifacts
+    .filter(a => filter === 'all' || a.category === filter)
+    .map(a => `
+      <div class="artifact-card reveal">
+        <div class="artifact-image">
+          <div class="artifact-image-bg" style="background:${a.gradient}; width:100%; height:100%">
+          </div>
+        </div>
+        <div class="artifact-info">
+          <div class="artifact-period">${a.category} · ${a.period}</div>
+          <div class="artifact-name">${a.name}</div>
+          <div class="artifact-origin">${a.origin}</div>
+        </div>
+      </div>
+    `).join('');
+  grid.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  grid.querySelectorAll('.artifact-card').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+  });
+}
+renderArtifacts('all');
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    renderArtifacts(this.dataset.filter);
+  });
+});
+
+// Smooth nav
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+  });
+});
+</script>
+</body>
+</html>
