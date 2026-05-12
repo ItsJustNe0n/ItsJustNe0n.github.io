@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Ottoman Empire — A Museum Experience</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8C97A;
+    --gold-dark: #8B6914;
+    --deep-red: #6B1A1A;
+    --crimson: #9B2335;
+    --ivory: #F5EDD6;
+    --parchment: #E8D5A3;
+    --dark-bg: #0D0A06;
+    --panel-bg: #1A1208;
+    --text-primary: #F5EDD6;
+    --text-secondary: #C4A96B;
+    --border-gold: #8B6914;
+    --shadow-gold: rgba(201,168,76,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--dark-bg);
+    color: var(--text-primary);
+    font-family: 'Crimson Text', serif;
+    font-size: 18px;
+    line-height: 1.7;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ENTRY / TITLE SCREEN */
+  #entry-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--dark-bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: opacity 1.2s ease;
+  }
+  #entry-screen.fade-out { opacity: 0; pointer-events: none; }
+
+  .entry-ornament {
+    font-size: 48px;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+    animation: pulse 3s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:0.7;} 50%{opacity:1;} }
+
+  .entry-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(28px, 5vw, 64px);
+    font-weight: 700;
+    color: var(--gold);
+    text-align: center;
+    letter-spacing: 0.12em;
+    text-shadow: 0 0 40px rgba(201,168,76,0.6);
+    margin-bottom: 0.3rem;
+  }
+  .entry-subtitle {
+    font-family: 'IM Fell English', serif;
+    font-size: clamp(14px, 2vw, 22px);
+    color: var(--text-secondary);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-bottom: 3rem;
+    text-align: center;
+  }
+  .entry-dates {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    letter-spacing: 0.2em;
+    color: var(--gold-dark);
+    margin-bottom: 3rem;
+  }
+  .enter-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    background: transparent;
+    padding: 14px 48px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .enter-btn:hover {
+    background: var(--gold);
+    color: var(--dark-bg);
+    box-shadow: 0 0 30px var(--shadow-gold);
+  }
+
+  /* MAIN APP — hidden until entered */
+  #app { display: none; min-height: 100vh; }
+  #app.visible { display: block; }
+
+  /* ─── HEADER / NAV ─── */
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: linear-gradient(to bottom, rgba(13,10,6,0.98), rgba(13,10,6,0.85));
+    border-bottom: 1px solid var(--border-gold);
+    padding: 0 2rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header-logo {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+  .header-nav { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .nav-era {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+    padding: 5px 10px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .nav-era:hover { border-color: var(--gold); color: var(--gold); }
+  .nav-era.active { border-color: var(--gold); color: var(--dark-bg); background: var(--gold); }
+
+  /* ─── MAIN GALLERY ─── */
+  #gallery {
+    padding-top: 60px;
+    min-height: 100vh;
+  }
+
+  /* HALL - one per era */
+  .hall {
+    display: none;
+    min-height: calc(100vh - 60px);
+    position: relative;
+  }
+  .hall.active { display: block; }
+
+  /* HALL HERO BANNER */
+  .hall-hero {
+    position: relative;
+    height: 340px;
+    display: flex;
+    align-items: flex-end;
+    padding: 0 4rem 2.5rem;
+    overflow: hidden;
+  }
+  .hall-hero-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.35) sepia(0.4);
+  }
+  .hall-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(13,10,6,0.95) 0%, rgba(13,10,6,0.3) 60%, transparent 100%);
+  }
+  .hall-hero-content { position: relative; z-index: 1; max-width: 800px; }
+  .hall-number {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .hall-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(22px, 4vw, 46px);
+    font-weight: 700;
+    color: var(--ivory);
+    line-height: 1.1;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+  }
+  .hall-dates {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    color: var(--gold);
+    letter-spacing: 0.2em;
+    margin-top: 0.5rem;
+  }
+
+  /* EXHIBIT GRID */
+  .exhibit-area {
+    padding: 3rem 2rem 4rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .exhibit-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.5rem;
+  }
+
+  /* EXHIBIT CARD */
+  .exhibit-card {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-gold);
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .exhibit-card:hover {
+    border-color: var(--gold);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 40px rgba(201,168,76,0.2);
+  }
+  .exhibit-card:hover .card-title { color: var(--gold-light); }
+  .exhibit-card-image {
+    width: 100%;
+    height: 160px;
+    background: #111;
+    overflow: hidden;
+    position: relative;
+  }
+  .exhibit-icon {
+    width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+    filter: grayscale(0.3);
+    background: radial-gradient(ellipse at center, #2a1f08 0%, #0d0a06 100%);
+  }
+  .exhibit-card-body { padding: 1.2rem 1.4rem; }
+  .card-tag {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--gold-dark);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    color: var(--text-primary);
+    line-height: 1.3;
+    margin-bottom: 0.6rem;
+    transition: color 0.2s;
+  }
+  .card-teaser {
+    font-family: 'Crimson Text', serif;
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .card-explore {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .card-explore::after { content: '→'; }
+
+  /* TIMELINE STRIP */
+  .timeline-strip {
+    position: relative;
+    padding: 2rem 2rem;
+    overflow-x: auto;
+    border-top: 1px solid var(--border-gold);
+    border-bottom: 1px solid var(--border-gold);
+    background: rgba(26,18,8,0.7);
+    margin-bottom: 2rem;
+  }
+  .timeline-inner {
+    display: flex;
+    gap: 0;
+    min-width: max-content;
+    align-items: center;
+    position: relative;
+  }
+  .timeline-inner::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0; right: 0;
+    height: 1px;
+    background: var(--border-gold);
+    transform: translateY(-50%);
+  }
+  .tl-event {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 20px;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    min-width: 100px;
+  }
+  .tl-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--gold-dark);
+    border: 2px solid var(--border-gold);
+    transition: all 0.2s;
+    margin-bottom: 6px;
+  }
+  .tl-event:hover .tl-dot {
+    background: var(--gold);
+    box-shadow: 0 0 12px var(--shadow-gold);
+    transform: scale(1.5);
+  }
+  .tl-year {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+  .tl-label {
+    font-size: 10px;
+    color: var(--text-secondary);
+    text-align: center;
+    max-width: 80px;
+    line-height: 1.3;
+  }
+
+  /* ─── MODAL / EXHIBIT VIEWER ─── */
+  #modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 500;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  #modal-backdrop.open { display: flex; }
+
+  #modal {
+    background: var(--panel-bg);
+    border: 1px solid var(--border-gold);
+    max-width: 780px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: modalIn 0.35s ease;
+  }
+  @keyframes modalIn { from{opacity:0;transform:scale(0.96) translateY(10px);} to{opacity:1;transform:none;} }
+
+  .modal-header {
+    position: sticky;
+    top: 0;
+    background: var(--panel-bg);
+    border-bottom: 1px solid var(--border-gold);
+    padding: 1.4rem 1.8rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    z-index: 1;
+  }
+  .modal-close {
+    background: none;
+    border: 1px solid var(--border-gold);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 18px;
+    width: 32px; height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    margin-left: 1rem;
+  }
+  .modal-close:hover { border-color: var(--gold); color: var(--gold); }
+  .modal-tag {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--gold-dark);
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+  .modal-title {
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    color: var(--gold-light);
+    line-height: 1.2;
+  }
+  .modal-body { padding: 2rem 1.8rem; }
+  .modal-icon {
+    text-align: center;
+    font-size: 72px;
+    margin-bottom: 1.5rem;
+    filter: grayscale(0.2);
+  }
+  .modal-text {
+    font-family: 'Crimson Text', serif;
+    font-size: 17px;
+    color: var(--text-primary);
+    line-height: 1.8;
+  }
+  .modal-text p { margin-bottom: 1rem; }
+  .modal-text p:last-child { margin-bottom: 0; }
+  .modal-quote {
+    border-left: 3px solid var(--gold);
+    padding: 0.8rem 1.2rem;
+    margin: 1.5rem 0;
+    background: rgba(201,168,76,0.07);
+  }
+  .modal-quote p {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    color: var(--text-secondary);
+    font-size: 16px;
+    margin: 0;
+  }
+  .modal-facts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border-gold);
+    border: 1px solid var(--border-gold);
+    margin: 1.5rem 0;
+  }
+  .modal-fact {
+    background: var(--panel-bg);
+    padding: 0.8rem 1rem;
+  }
+  .fact-label {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--gold-dark);
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+  .fact-value {
+    font-family: 'Crimson Text', serif;
+    font-size: 15px;
+    color: var(--text-primary);
+  }
+
+  /* ─── MAP SECTION ─── */
+  .map-section {
+    padding: 1rem 1.8rem 2rem;
+    border-top: 1px solid var(--border-gold);
+  }
+  .map-section h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--gold-dark);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .map-svg-wrap {
+    border: 1px solid var(--border-gold);
+    overflow: hidden;
+  }
+
+  /* NAV ARROWS */
+  .hall-nav {
+    display: flex;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    border-top: 1px solid var(--border-gold);
+    margin-top: 2rem;
+  }
+  .hall-nav-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    background: transparent;
+    border: 1px solid var(--border-gold);
+    padding: 10px 24px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .hall-nav-btn:hover { border-color: var(--gold); background: rgba(201,168,76,0.1); }
+  .hall-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--dark-bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border-gold); }
+</style>
+</head>
+<body>
+
+<!-- ENTRY SCREEN -->
+<div id="entry-screen">
+  <div class="entry-ornament">☽</div>
+  <div class="entry-title">The Ottoman Empire</div>
+  <div class="entry-subtitle">A Museum of Six Centuries</div>
+  <div class="entry-dates">c. 1299 — 1922 CE</div>
+  <button class="enter-btn" onclick="enterMuseum()">Enter the Museum</button>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <header>
+    <div class="header-logo">☽ Ottoman Museum</div>
+    <nav class="header-nav" id="main-nav"></nav>
+  </header>
+
+  <div id="gallery"></div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-backdrop" onclick="closeModal(event)">
+  <div id="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-tag" id="modal-tag"></div>
+        <div class="modal-title" id="modal-title"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  DATA
+// ─────────────────────────────────────────────
+const ERAS = [
+  {
+    id: 'origins',
+    nav: 'Origins',
+    hallNum: 'Hall I',
+    title: 'Origins & Founding',
+    dates: 'c. 1258 – 1326',
+    heroBg: '#2C1810',
+    heroGradient: 'radial-gradient(ellipse at 30% 60%, #4a2810 0%, #1a0c05 100%)',
+    intro: 'From the chaos of the Mongol invasion, a small Turkic tribe on the Byzantine frontier began its unlikely rise.',
+    timeline: [
+      { year: '1258', label: 'Mongols sack Baghdad' },
+      { year: '1281', label: 'Osman I leads tribe' },
+      { year: '1299', label: 'Traditional founding' },
+      { year: '1326', label: 'Osman dies, Bursa falls' },
+    ],
+    exhibits: [
+      {
+        tag: 'Context', icon: '🌍', title: 'The Mongol Disruption',
+        teaser: 'In 1258, Hülegü Khan's armies sacked Baghdad, ending the Abbasid Caliphate and sending refugees flooding into Anatolia.',
+        body: `<p>The world into which the Ottoman dynasty was born was one of catastrophic upheaval. In 1258, Mongol forces under Hülegü Khan stormed Baghdad, then the greatest city of the Islamic world, killing the Abbasid Caliph Al-Musta'sim and destroying the seat of Islamic political power that had endured for five centuries.</p><p>This cataclysm sent waves of refugees—scholars, soldiers, Sufi mystics, craftsmen—westward into Anatolia. The Seljuk Sultanate of Rum, itself weakened and made tributary to the Mongols, fragmented into a patchwork of small Turkish principalities called <em>beyliks</em>. Each beylik was led by a <em>ghazi</em>—a frontier warrior for the faith—who raided Byzantine territory and attracted followers with the promise of spoils and religious purpose.</p><p>It was in this chaotic, fluid frontier world—part Islamic, part Byzantine, full of displaced peoples seeking a new order—that the Ottoman story began.</p>`,
+        facts: [['Date','1258 CE'],['Event','Fall of Baghdad'],['Consequence','Abbasid Caliphate destroyed'],['Impact','Refugees flood Anatolia']]
+      },
+      {
+        tag: 'Founder', icon: '⚔️', title: 'Osman I — The Founder',
+        teaser: 'Son of the tribal leader Ertugrul, Osman transformed a small nomadic band into the seed of an empire through brilliant politics and relentless raiding.',
+        body: `<p>Osman (c. 1258–1326), from whom the dynasty takes its name—"Ottoman" being the Latinisation of "Osmanlı"—was the son of Ertugrul, a minor Turkic chieftain who had been granted pasture land in northwest Anatolia by the Seljuks, near the Byzantine frontier town of Söğüt.</p><p>What distinguished Osman was not merely military skill but political genius. He cultivated close relations with the Ahi brotherhood of craftsmen and the Sufi dervish orders, giving his enterprise spiritual legitimacy. He attracted followers regardless of origin—Turks, Byzantine converts, and others—bound not by ethnicity but by loyalty to his person and the promise of the <em>ghazi</em> ideal.</p><p>His raids on Byzantine territory steadily expanded his territory and enriched his followers. By the final years of his life, Osman controlled a substantial principality and had laid siege to the prosperous Byzantine city of Bursa. He died around 1326 before its fall, but his son Orhan completed the conquest—establishing the first great Ottoman capital.`,
+        facts: [['Born','c. 1258'],['Died','c. 1326'],['Title','Bey of the Ottomans'],['Capital','Söğüt, then Bursa (posthumously)']],
+        quote: 'The Ottoman state is like a great tree: its roots are the House of Osman, whose branches spread shade across the world.'
+      },
+      {
+        tag: 'Society', icon: '🕌', title: 'The Ghazi Ideal',
+        teaser: 'The concept of the ghazi — the holy warrior on the frontier — gave the early Ottoman enterprise its ideological energy and attracted warriors from across the Islamic world.',
+        body: `<p>The <em>ghazi</em> (plural: <em>ghuzat</em>) was a warrior who fought on the frontier between the Islamic world and the lands of the unbeliever. The ghazi ideal was not merely military—it was spiritual. To fight on the frontier was to participate in the great religious mission of expanding the Dar al-Islam (the Abode of Islam).</p><p>For the early Ottomans, this ideology was invaluable. It justified raiding and conquest while attracting recruits who sought both religious reward and material gain. The Byzantine frontier was rich territory—prosperous towns, fertile valleys, and a weakening empire unable to defend its borders.</p><p>Importantly, the ghazi identity was flexible. Non-Muslim fighters could participate in Ottoman campaigns, and many Byzantine frontier lords converted and were absorbed into the Ottoman enterprise. This inclusive pragmatism—Islam as a broad tent—would remain a defining Ottoman characteristic.</p>`,
+        facts: [['Concept','Ghazi (holy warrior)'],['Language','Turkic / Ottoman'],['Religion','Sunni Islam'],['Frontier','Byzantine Anatolia']]
+      },
+      {
+        tag: 'Administration', icon: '📜', title: 'Early State Building',
+        teaser: 'Even as a small beylik, Osman created the administrative and institutional foundations that would support a future empire.',
+        body: `<p>Though governing a small territory, Osman made deliberate choices that shaped the empire's future. He established clear succession norms (though dynastic civil wars remained common), built relationships with local religious authorities, and created a basic administrative structure.</p><p>The Ottoman state from its earliest days showed a remarkable capacity for absorbing and adapting existing institutions. Byzantine administrative practices, Seljuk governmental traditions, and Islamic legal norms were all incorporated. This pragmatic eclecticism—taking what worked from whoever had it—became an Ottoman hallmark.</p><p>The concept of the <em>devshirme</em>—the recruitment of talented individuals regardless of birth origin—had not yet been formalized, but its spirit was already present in Osman's willingness to accept converts and allies from all backgrounds.</p>`,
+        facts: [['System','Beylik (principality)'],['Ideology','Ghazi + Islamic legitimacy'],['Law','Customary + emerging Islamic'],['Legacy','Template for empire']]
+      }
+    ]
+  },
+  {
+    id: 'expansion',
+    nav: 'Expansion',
+    hallNum: 'Hall II',
+    title: 'Conquest & European Expansion',
+    dates: '1326 – 1402',
+    heroBg: '#1A1A0A',
+    heroGradient: 'radial-gradient(ellipse at 70% 40%, #2a2a10 0%, #0d0d05 100%)',
+    intro: 'Under Orhan, Murad I, and Bayezid I, the Ottomans crossed into Europe, shattered kingdoms, and built the most powerful military of their age.',
+    timeline: [
+      { year: '1326', label: 'Bursa captured' },
+      { year: '1354', label: 'Entry into Europe' },
+      { year: '1389', label: 'Battle of Kosovo' },
+      { year: '1396', label: 'Battle of Nicopolis' },
+      { year: '1402', label: 'Defeat at Ankara' },
+    ],
+    exhibits: [
+      {
+        tag: 'Military', icon: '🏹', title: 'The Janissaries — Elite Infantry',
+        teaser: 'Created by Murad I, the Janissaries were the world\'s first professional standing army — Christian-born boys raised as the sultan\'s personal soldiers.',
+        body: `<p>The Janissary corps (<em>Yeniçeri</em>, "New Soldiers") was one of the most remarkable military institutions in history. Established under Murad I in the 1360s–1380s, it was recruited through the <em>devshirme</em> ("collection") system: boys aged 8–18 were taken from Christian families in the Balkans, converted to Islam, given rigorous education and military training, and became personal servants of the sultan.</p><p>This system was both brutal and meritocratic. Boys of the highest ability could rise to become generals or grand viziers—the highest offices in the land. Severed from their families and origin communities, they owed everything to the sultan alone. This made them uniquely loyal—at least initially.</p><p>The Janissaries were elite, disciplined, and eventually armed with firearms before most European armies. They were the shock troops of Ottoman conquest from the Balkans to Baghdad. Paradoxically, this same elite corps would later become one of the empire's greatest liabilities, functioning as a conservative political force that murdered reforming sultans.`,
+        facts: [['Founded','c. 1363'],['Founder','Murad I'],['System','Devshirme (collection)'],['Abolished','1826, by Mahmud II']],
+        quote: 'The Janissaries are the sinews of the Ottoman state — without them, the body cannot move.'
+      },
+      {
+        tag: 'Battle', icon: '⚔️', title: 'The Battle of Kosovo, 1389',
+        teaser: 'On the Field of Blackbirds, the Ottomans shattered the Serbian kingdom — a victory that cemented Balkan dominance and became an eternal myth for both peoples.',
+        body: `<p>On June 28, 1389, on the plain known as Kosovo Polje ("Field of Blackbirds"), two armies met. The Ottoman force under Sultan Murad I faced a coalition of Balkan Christians led by the Serbian Prince Lazar Hrebeljanović. The battle was decisive: the Ottoman army won, Prince Lazar was captured and executed, and the Serbian kingdom was effectively broken as an independent power.</p><p>What made Kosovo more than a military event was its mythology. Sultan Murad himself died during or after the battle—killed, in the most famous account, by the Serbian nobleman Miloš Obilić, who feigned submission and then stabbed the sultan. Murad became a martyr; Kosovo became sacred ground.</p><p>For Serbs, Kosovo became the defining national myth—a defeat that paradoxically formed the soul of the nation, a sacrifice that demanded eventual redemption. When Serbian nationalists in the late nineteenth and early twentieth centuries mobilized for independence and unification, Kosovo was always the rallying cry.`,
+        facts: [['Date','June 28, 1389'],['Location','Kosovo Polje, Serbia'],['Ottoman Commander','Murad I (killed in battle)'],['Result','Decisive Ottoman victory']]
+      },
+      {
+        tag: 'Disaster', icon: '🔥', title: 'Timur and the Disaster at Ankara',
+        teaser: 'In 1402, the mighty Timur (Tamerlane) shattered the Ottoman army and captured Sultan Bayezid I — nearly ending the empire before it reached its full power.',
+        body: `<p>Bayezid I, called <em>Yıldırım</em> ("the Thunderbolt"), had extended Ottoman power to its greatest extent yet—crushing a Crusade at Nicopolis in 1396 and besieging Constantinople. He seemed unstoppable. Then Timur arrived.</p><p>Timur (Tamerlane), the Turco-Mongol conqueror from Samarkand, had built an empire stretching from Persia to India. When Bayezid insulted Timur's vassals and harbored his enemies, war became inevitable. On July 28, 1402, at the Battle of Ankara, the two greatest powers of the Islamic world collided. Timur's forces decisively defeated the Ottomans; Bayezid was captured—the first and only Ottoman sultan ever taken prisoner—and died in captivity in 1403.</p><p>The disaster triggered a decade-long civil war, the Ottoman Interregnum, as Bayezid's sons fought for the throne. Yet the empire survived. Its institutions were resilient enough to weather even this catastrophe, and Mehmed I eventually reunited the realm by 1413.`,
+        facts: [['Date','July 28, 1402'],['Location','Ankara, Anatolia'],['Captured','Sultan Bayezid I'],['Consequence','10-year civil war (Interregnum)']]
+      },
+      {
+        tag: 'Europe', icon: '🗺️', title: 'Crossing into the Balkans',
+        teaser: 'In 1354, Ottoman forces seized Gallipoli — the gateway to Europe. Within decades, Bulgaria, Serbia, and much of Greece fell under Ottoman suzerainty.',
+        body: `<p>The Ottoman crossing into Europe was not a single dramatic invasion but a series of opportunistic advances. In 1354, during an earthquake that damaged the walls of Gallipoli (Gelibolu), Ottoman forces seized the peninsula—establishing the first permanent Ottoman foothold in Europe. From this bridgehead, expansion was rapid.</p><p>Murad I captured Adrianople (Edirne) around 1369 and made it the new Ottoman capital—a declaration that the empire's future lay in Europe. The Balkans were more populous, wealthier, and better connected than Anatolia, and the Byzantine Empire's weakness left a power vacuum that the Ottomans were uniquely positioned to fill.</p><p>The Ottoman approach was often more pragmatic than brutal. Local lords who submitted were frequently confirmed in their positions as vassals, paying tribute and providing troops. Only resistance invited destruction. This flexibility accelerated conquest and helped maintain order in conquered territories.`,
+        facts: [['Gallipoli seized','1354'],['Adrianople taken','c. 1369'],['New capital','Edirne (Adrianople)'],['Method','Conquest + vassalage']]
+      }
+    ]
+  },
+  {
+    id: 'constantinople',
+    nav: 'Constantinople',
+    hallNum: 'Hall III',
+    title: 'The Fall of Constantinople',
+    dates: '1453',
+    heroBg: '#0D1520',
+    heroGradient: 'radial-gradient(ellipse at 50% 50%, #1a2535 0%, #050a12 100%)',
+    intro: 'On May 29, 1453, the city that had stood for over a thousand years fell to the armies of the young Sultan Mehmed II. The world would never be the same.',
+    timeline: [
+      { year: '1451', label: 'Mehmed II becomes sultan' },
+      { year: 'Apr 1453', label: 'Siege begins' },
+      { year: 'May 1453', label: 'Fleet dragged overland' },
+      { year: '29 May', label: 'City falls' },
+    ],
+    exhibits: [
+      {
+        tag: 'Sultan', icon: '👑', title: 'Mehmed II — The Conqueror',
+        teaser: 'Brilliant, ruthless, and obsessively educated, Mehmed II came to the throne at 19 with one overriding ambition: to take Constantinople.',
+        body: `<p>Mehmed II (1432–1481) was one of history's most remarkable rulers. He came to the throne twice—first as a teenager (1444–1446) before being recalled to manage an older brother's challenge, then definitively in 1451 at age 19. From the moment of his second accession, he began planning the conquest of Constantinople with meticulous detail.</p><p>Mehmed was a polyglot, reportedly speaking six languages including Greek and Latin. He was deeply read in ancient history—particularly the history of Alexander and the Roman emperors—and conceived of himself as heir to both Islamic and classical traditions. After taking Constantinople, he styled himself <em>Kayser-i Rum</em> ("Caesar of Rome"), commissioning Byzantine and Italian artists, inviting scholars to his court, and sitting for a portrait by Gentile Bellini.</p><p>He was also ruthless. He executed his own infant brother to prevent future succession challenges (a practice later codified as Ottoman law). He executed his beloved grand vizier Ibrahim Pasha on suspicion of disloyalty. He combined Renaissance-man curiosity with total political ruthlessness—a genuinely terrifying combination.`,
+        facts: [['Born','March 30, 1432'],['Died','May 3, 1481'],['Title','Fatih (the Conqueror)'],['Languages','6, including Greek and Latin']],
+        quote: 'There is only one empire, one faith, and one sovereign power in the world.'
+      },
+      {
+        tag: 'Siege', icon: '🏰', title: 'The Siege: 53 Days',
+        teaser: 'Mehmed brought 80,000 soldiers, massive cannons, and extraordinary engineering ingenuity to the walls that had withstood sieges for a thousand years.',
+        body: `<p>The siege began on April 2, 1453. Mehmed's army numbered perhaps 60,000–80,000 men; the Byzantine defenders numbered no more than 7,000. The Byzantines stretched a great iron chain across the Golden Horn to prevent Ottoman ships from entering the harbor and attacking the weaker seaward walls.</p><p>Mehmed's response was one of the great feats of military engineering in history. He had his fleet dragged overland on greased wooden cradles—70 ships hauled across the hills of Galata in a single night—and relaunched inside the Golden Horn. The psychological impact on the defenders was devastating.</p><p>The great walls, which had stood for over a thousand years, were battered relentlessly by Mehmed's enormous cannons. The largest, the Basilica cannon cast by the Hungarian engineer Urban, could hurl stone balls weighing 600 kg over a kilometer. Though it could only fire seven times a day, its impact was enormous. Breaches were opened and repaired repeatedly. The defenders, though brilliantly led by the last emperor and the Genoese condottiere Giovanni Giustiniani, were simply too few.`,
+        facts: [['Duration','53 days (Apr 2 – May 29)'],['Ottoman army','~60,000–80,000'],['Defenders','~7,000'],['Key weapon','Basilica cannon (Urban\'s bombard)']]
+      },
+      {
+        tag: 'Fall', icon: '☪️', title: 'May 29, 1453 — The Final Day',
+        teaser: 'As Ottoman troops poured through the breached walls, the last Byzantine emperor Constantine XI died fighting. Mehmed rode into the Hagia Sophia and proclaimed it a mosque.',
+        body: `<p>In the predawn hours of May 29, 1453, Mehmed launched his final assault. The outnumbered defenders had fought heroically for seven weeks. The turning point came when Giustiniani, the Genoese commander, was wounded and evacuated—his departure shattering morale at the critical moment.</p><p>Ottoman troops poured through breaches in the walls and through a small gate (the Kerkoporta) that had been left unlocked. Constantine XI Palaiologos, the last Byzantine emperor, reportedly tore off his imperial insignia and threw himself into the fighting. His body was never identified with certainty.</p><p>Mehmed entered the city later that morning. He rode directly to the Hagia Sophia—the great domed church built by Justinian in the sixth century—and declared it a mosque. He is said to have recited the famous Persian verse: "The spider weaves the curtains in the palace of the Caesars / The owl calls the watches in the towers of Afrasiab."</p><p>Throughout Europe, church bells rang in mourning. Pope Nicholas V wrote that it was "the second death of Homer and Plato." The medieval world had ended.`,
+        facts: [['Date','May 29, 1453'],['Last emperor','Constantine XI (died fighting)'],['First act','Hagia Sophia declared a mosque'],['Significance','End of the Byzantine Empire']]
+      },
+      {
+        tag: 'Legacy', icon: '⭐', title: 'New Rome — Istanbul',
+        teaser: 'Mehmed repopulated Constantinople, made it his capital, and transformed it into one of the great cities of the world — the beating heart of a new empire.',
+        body: `<p>Mehmed did not sack Constantinople in the conventional sense. He wanted a functioning capital, not a ruin. After allowing three days of plunder (traditional practice after a city refuses surrender), he moved quickly to repopulate and rebuild. He invited—and sometimes compelled—populations from across the empire to settle in the city, now renamed İstanbul (though "Constantinople" remained in widespread use).</p><p>He embarked on massive building projects: the Topkapı Palace complex, markets, hans (caravanserais), mosques, and the Grand Bazaar. He invited Greek scholars, Italian artists, and Persian poets to his court. He ordered the Patriarch of Constantinople to remain in the city and continue as head of the Orthodox Church, establishing the pattern of Ottoman religious tolerance toward non-Muslim subjects.</p><p>Within a generation, Istanbul was again one of the largest and most cosmopolitan cities in the world—a city of Muslims, Christians, and Jews; of Turks, Greeks, Armenians, and Italians; of mosques, churches, and synagogues. It remained the Ottoman capital until the empire's end.`,
+        facts: [['New name','Istanbul (from Greek "eis tin polin")'],['New buildings','Topkapı Palace, Grand Bazaar'],['Population policy','Forced resettlement from across empire'],['Religious policy','Orthodox Patriarch retained']]
+      }
+    ]
+  },
+  {
+    id: 'golden',
+    nav: 'Golden Age',
+    hallNum: 'Hall IV',
+    title: 'The Golden Age of Suleiman',
+    dates: '1481 – 1566',
+    heroBg: '#1A1408',
+    heroGradient: 'radial-gradient(ellipse at 40% 50%, #3a2c10 0%, #0d0a04 100%)',
+    intro: 'Under Selim I and the Magnificent Suleiman, the empire reached its absolute peak — from the gates of Vienna to the heart of Arabia, a civilization at the height of its powers.',
+    timeline: [
+      { year: '1514', label: 'Battle of Chaldiran' },
+      { year: '1517', label: 'Egypt conquered' },
+      { year: '1521', label: 'Belgrade falls' },
+      { year: '1526', label: 'Battle of Mohács' },
+      { year: '1529', label: 'Siege of Vienna' },
+      { year: '1566', label: 'Suleiman dies' },
+    ],
+    exhibits: [
+      {
+        tag: 'Sultan', icon: '🌙', title: 'Suleiman the Magnificent',
+        teaser: 'Called "the Lawgiver" by his own people, Suleiman commanded the greatest empire of his age — soldier, poet, and legislator in one remarkable figure.',
+        body: `<p>Suleiman I (1494–1566) reigned for 46 years, the longest of any Ottoman sultan, and his reign represents the apex of Ottoman civilization. To European observers, he was "the Magnificent"—a ruler whose wealth, power, and splendor dazzled a continent. To his own people, he was <em>Kanuni</em>, "the Lawgiver"—the sultan who codified Ottoman law into a comprehensive legal system.</p><p>As a military commander, he was exceptional. He personally led 13 major campaigns. He captured Belgrade (1521), crushed the Hungarian kingdom at Mohács (1526), nearly took Vienna (1529), and fought three wars against the Safavid Persians. His navy under Hayreddin Barbarossa dominated the Mediterranean, ranging as far as the western Mediterranean and the Atlantic coast of Spain.</p><p>As an administrator, he reorganized the empire's legal system, harmonizing Islamic <em>sharia</em> with customary law (<em>örf</em>) and the sultan's own edicts (<em>kanun</em>). His bureaucracy was highly sophisticated, staffed by brilliant ministers trained in the palace school system.</p><p>As a patron, he transformed Istanbul and the empire's cities. The architect Sinan, whom he employed for decades, produced masterpieces including the Süleymaniye Mosque. Ottoman poetry, ceramics, and calligraphy reached their classical peak.`,
+        facts: [['Born','November 6, 1494'],['Died','September 6, 1566'],['Reign','1520–1566 (46 years)'],['Titles','Kanuni (Lawgiver), the Magnificent']],
+        quote: 'I am God\'s slave and sultan of this world. By the grace of God I am head of Muhammad\'s community.'
+      },
+      {
+        tag: 'Architecture', icon: '🏛️', title: 'Sinan — Master Builder',
+        teaser: 'Mimar Sinan, chief architect under Suleiman, built over 300 structures across the empire — including two of the most perfect buildings ever constructed.',
+        body: `<p>Mimar Sinan (c. 1490–1588) was the greatest architect of the sixteenth century, a figure comparable to Michelangelo in creative scope and achievement. Like many great Ottoman servants, he was born Christian—probably of Greek or Armenian origin—and entered imperial service through the devshirme system, rising to become Chief Imperial Architect under Suleiman, Selim II, and Murad III.</p><p>He built over 300 structures across the empire: mosques, madrasas, caravanserais, bridges, palaces, hospitals, and aqueducts. His three greatest works chart his artistic development: the Şehzade Mosque (Istanbul, 1548), which he called his "apprentice work"; the Süleymaniye Mosque (Istanbul, 1557), his "journeyman work"; and the Selimiye Mosque (Edirne, 1574), which he considered his masterpiece.</p><p>The Selimiye remains one of the most technically and aesthetically perfect buildings ever constructed—its central dome slightly wider than that of Hagia Sophia, achieved through an octagonal support system of unprecedented elegance. Sinan died at approximately 98 years of age, still active as chief architect.`,
+        facts: [['Born','c. 1490'],['Died','1588 (aged ~98)'],['Buildings','300+ across the empire'],['Masterpiece','Selimiye Mosque, Edirne (1574)']]
+      },
+      {
+        tag: 'Society', icon: '👸', title: 'Hürrem Sultan — The Powerful Queen',
+        teaser: 'A Ukrainian-born slave who became Suleiman\'s legal wife, Hürrem shattered Ottoman conventions and exercised political power no woman had wielded before.',
+        body: `<p>Hürrem Sultan (c. 1502–1558), known in Europe as Roxelana ("the Ruthenian"), was born in what is now western Ukraine, probably to a Christian family. She was captured in a raid and enslaved, eventually entering the Ottoman imperial harem, where her intelligence and personality captivated the young Suleiman.</p><p>What Hürrem achieved was extraordinary by any measure. Ottoman sultans traditionally did not marry concubines—they kept harems, not wives. Hürrem became Suleiman's legal wife, the first Ottoman consort to hold this status in generations, and Suleiman's apparent lifelong love (he composed love poetry to her). She bore him several sons and a daughter.</p><p>She also exercised real political influence, corresponding with European rulers, managing charitable foundations, and—in the most disputed aspect of her legacy—allegedly convincing Suleiman to execute his eldest son Şehzade Mustafa (from another concubine) in 1553, clearing the path for her own son Selim to the succession. Whether the accusation is just remains debated, but the political consequences were severe.`,
+        facts: [['Born','c. 1502, Ruthenia (Ukraine)'],['Died','1558'],['Title','Haseki Sultan (legal wife)'],['Significance','First Ottoman sultan\'s wife in generations']]
+      },
+      {
+        tag: 'Conquest', icon: '🗡️', title: 'Selim I & the Caliphate',
+        teaser: 'In three swift years, Selim I conquered Safavid Persia, Mamluk Egypt, and Syria — acquiring control of Mecca and Medina and arguably becoming Caliph of all Sunni Muslims.',
+        body: `<p>Selim I (r. 1512–1520), who came to power by deposing his own father Bayezid II with Janissary backing, was perhaps the most purely military of all Ottoman sultans. In just eight years of rule, he nearly doubled the empire's territory.</p><p>In 1514, at the Battle of Chaldiran in eastern Anatolia, Selim defeated the Safavid Shah Ismail—whose Shia Muslim empire was the Ottomans' greatest rival—and annexed eastern Anatolia and Kurdistan. Then, in 1516–1517, he swept through Syria and Egypt with extraordinary speed, destroying the Mamluk Sultanate that had ruled those regions for 250 years.</p><p>The conquest of Egypt had profound consequences. In Cairo, Selim received the submission of the last Abbasid shadow caliph, al-Mutawakkil III. Later Ottoman tradition held that al-Mutawakkil formally transferred the caliphate to Selim, making the Ottoman sultan the legitimate Commander of the Faithful for all Sunni Muslims worldwide. With control of Mecca and Medina, the holiest cities of Islam, the Ottomans became the undisputed guardians of the faith.`,
+        facts: [['Battle of Chaldiran','1514 — defeated Safavids'],['Egypt conquered','1517'],['Cities gained','Mecca, Medina, Jerusalem, Cairo'],['Title acquired','Khadim al-Haramayn (Servant of the Two Mosques)']]
+      }
+    ]
+  },
+  {
+    id: 'decline',
+    nav: 'Decline',
+    hallNum: 'Hall V',
+    title: 'Stagnation & Long Decline',
+    dates: '1566 – 1800',
+    heroBg: '#12100A',
+    heroGradient: 'radial-gradient(ellipse at 60% 40%, #201a0a 0%, #080605 100%)',
+    intro: 'After Suleiman, the shadow of power remained, but the empire began a long, painful reckoning with European military modernization, Janissary politics, and territorial loss.',
+    timeline: [
+      { year: '1571', label: 'Battle of Lepanto' },
+      { year: '1683', label: 'Second Siege of Vienna' },
+      { year: '1699', label: 'Treaty of Karlowitz' },
+      { year: '1718', label: 'Tulip Era begins' },
+      { year: '1774', label: 'Treaty of Küçük Kaynarca' },
+    ],
+    exhibits: [
+      {
+        tag: 'Politics', icon: '👸', title: 'The Sultanate of Women',
+        teaser: 'For much of the 17th century, the real power behind weak or child sultans was wielded by the valide sultan — the queen mother — and the women of the imperial harem.',
+        body: `<p>The period roughly 1566–1656 is known in Ottoman historiography as the <em>Kadınlar Saltanatı</em> ("Sultanate of Women"), reflecting the extraordinary political influence exercised by women of the imperial family during a time of weak or young sultans.</p><p>The most powerful figures were the <em>valide sultan</em> (queen mother). Nurbanu Sultan (mother of Murad III), Safiye Sultan (mother of Mehmed III), and above all Kösem Sultan (mother of Murad IV and Ibrahim I, grandmother of Mehmed IV) were de facto rulers of the empire for extended periods, managing grand viziers, directing foreign policy, and building their own patronage networks.</p><p>Kösem Sultan's career was especially remarkable. She governed the empire twice as regent, corresponded with foreign rulers, and managed palace politics with formidable skill for over four decades. She was ultimately strangled on the orders of her own daughter-in-law Turhan Sultan in 1651, in a coup that ended the Sultanate of Women era—but her death came only after she had dominated Ottoman politics longer than most sultans reigned.`,
+        facts: [['Period','c. 1566–1656'],['Key figures','Nurbanu, Safiye, Kösem Sultan'],['Power base','Harem, valide sultan position'],['End','Kösem Sultan murdered, 1651']]
+      },
+      {
+        tag: 'Military', icon: '⚔️', title: 'The Battle of Lepanto, 1571',
+        teaser: 'When the Holy League shattered the Ottoman fleet off the Greek coast, it proved for the first time that Ottoman power could be decisively defeated — a psychological watershed.',
+        body: `<p>On October 7, 1571, in the Gulf of Patras off western Greece, the largest naval battle of the sixteenth century took place. A Holy League fleet assembled by Pope Pius V—combining the navies of Venice, Spain, Genoa, and the Papacy—met the Ottoman fleet under Ali Pasha.</p><p>The result was a catastrophic Ottoman defeat. Some 230 Ottoman galleys were sunk or captured; approximately 30,000 Ottoman soldiers and sailors were killed. The Holy League freed some 15,000 Christian galley slaves from Ottoman ships. It was the worst naval defeat in Ottoman history.</p><p>The aftermath revealed Ottoman resilience. Within a year, the empire had rebuilt its fleet—"we have shaved Venice's beard," a Ottoman official reportedly said; "to cut off an arm is one thing, to shave a beard is another, for it grows back." The Ottomans did not lose their overall Mediterranean position. They captured Cyprus in 1571 and held it for centuries. Yet Lepanto demonstrated that Ottoman power was not invincible, and the psychological impact on both sides was enormous.`,
+        facts: [['Date','October 7, 1571'],['Location','Gulf of Patras, Greece'],['Result','Decisive Holy League victory'],['Ottoman losses','~30,000 men, 230 ships']]
+      },
+      {
+        tag: 'Turning Point', icon: '🏰', title: 'Vienna 1683 — The Tide Turns',
+        teaser: 'The second Ottoman siege of Vienna ended in catastrophic defeat — triggering the Treaty of Karlowitz and the first great territorial losses to Christian powers.',
+        body: `<p>Grand Vizier Kara Mustafa Pasha led an Ottoman army of perhaps 150,000 men to the walls of Vienna in July 1683. The city was held by a small garrison under Count Ernst Rüdiger von Starhemberg. Emperor Leopold I fled. The Ottomans dug siege trenches and tunneled beneath the walls.</p><p>On September 11–12, a relief army arrived: 65,000 Polish, German, and Austrian troops under the personal command of King Jan III Sobieski of Poland, who led the largest cavalry charge in history—18,000 horsemen sweeping down from the Kahlenberg hill in a single devastating assault. The Ottoman army collapsed in confusion and rout.</p><p>The defeat triggered a sustained counteroffensive by the Holy League. Over the following 16 years, Austria reconquered Hungary, Transylvania, and Slovenia. The resulting Treaty of Karlowitz (1699) forced the Ottomans to formally cede these territories—the first time in Ottoman history that significant territory had been surrendered by treaty to Christian powers. The era of Ottoman expansion in Europe was definitively over.`,
+        facts: [['Date','July–September 1683'],['Relief commander','King Jan III Sobieski of Poland'],['Treaty','Karlowitz, 1699'],['Lands lost','Hungary, Transylvania, Podolia']],
+        quote: 'We came to the walls of Vienna. We departed from the walls of Vienna. The rest is silence.'
+      },
+      {
+        tag: 'Reform', icon: '🌷', title: 'The Tulip Era & Early Reform',
+        teaser: 'Under Ahmed III, a brief flowering of cultural openness toward Europe — the Lale Devri — brought coffee houses, European fashions, and the first Ottoman printing press.',
+        body: `<p>The <em>Lale Devri</em> ("Tulip Era"), roughly 1718–1730, was a period of cultural and intellectual opening under Sultan Ahmed III and his influential grand vizier Nevşehirli Damat İbrahim Pasha. Ottoman elites developed a craze for tulips—elaborate tulip gardens were planted across Istanbul, and elaborate festivals were held under lantern-lit displays—but the era was more than a floral obsession.</p><p>Ibrahim Pasha sent diplomatic missions to Paris and Vienna and encouraged the introduction of European practices. In 1727, the first Ottoman printing press for Arabic-script books was established by Ibrahim Müteferrika—a significant step toward the dissemination of knowledge, though religious books remained excluded. European architectural influences appeared in Ottoman buildings. Ottoman elites began reading French books and corresponding with European philosophers.</p><p>The era ended abruptly with the Patrona Halil Revolt of 1730—a Janissary-led uprising that deposed Ahmed III and killed Ibrahim Pasha. The conservative backlash showed how difficult fundamental reform would be against entrenched interests.`,
+        facts: [['Period','1718–1730'],['Sultan','Ahmed III'],['Key innovation','First Arabic-script printing press (1727)'],['End','Patrona Halil Revolt, 1730']]
+      }
+    ]
+  },
+  {
+    id: 'tanzimat',
+    nav: 'Tanzimat',
+    hallNum: 'Hall VI',
+    title: 'Reform & the Tanzimat Era',
+    dates: '1800 – 1876',
+    heroBg: '#0A0E1A',
+    heroGradient: 'radial-gradient(ellipse at 30% 60%, #101828 0%, #04060e 100%)',
+    intro: 'Faced with military humiliation and European pressure, the empire launched sweeping modernizing reforms — abolishing the Janissaries, rewriting its laws, and promising equality to all subjects.',
+    timeline: [
+      { year: '1826', label: 'Janissaries abolished' },
+      { year: '1839', label: 'Tanzimat begins' },
+      { year: '1853', label: 'Crimean War' },
+      { year: '1856', label: 'Hatt-ı Hümayun edict' },
+      { year: '1876', label: 'First Constitution' },
+    ],
+    exhibits: [
+      {
+        tag: 'Reform', icon: '📜', title: 'Mahmud II — Destroyer of the Janissaries',
+        teaser: 'In 1826, Mahmud II lured the Janissaries into revolt, then crushed them with artillery in their own barracks — abolishing the 450-year-old corps in a single night.',
+        body: `<p>Mahmud II (r. 1808–1839) was one of the most consequential Ottoman sultans, a determined modernizer who understood that the Janissary corps—once the empire's greatest military strength—had become its greatest political liability.</p><p>By the early nineteenth century, the Janissaries had degenerated from elite warriors into a hereditary caste resistant to all reform. They had murdered or deposed multiple sultans who threatened their privileges. Mahmud spent years building a coalition of support and creating a parallel military force before acting.</p><p>In June 1826, when he announced the new European-trained army corps, the Janissaries revolted as expected—upending their cauldrons in the traditional signal of rebellion. This time, Mahmud was ready. He called out his loyal artillery and had the Janissary barracks in Istanbul bombarded, killing thousands. The corps was formally dissolved in an event celebrated in Ottoman official memory as the <em>Vaka-ı Hayriye</em> ("Auspicious Incident"). The fez replaced the turban; the old order began to crumble.`,
+        facts: [['Sultan','Mahmud II (r. 1808–1839)'],['Event','Vaka-ı Hayriye, June 1826'],['Corps abolished','Janissaries (founded c. 1363)'],['Followed by','Creation of new European-style army']]
+      },
+      {
+        tag: 'Law', icon: '⚖️', title: 'The Tanzimat — Reordering the Empire',
+        teaser: 'The Gülhane Edict of 1839 promised all Ottoman subjects — Muslim and non-Muslim alike — equal rights before the law, launching a generation of sweeping reform.',
+        body: `<p>On November 3, 1839, in the Rose Garden (Gülhane) of Topkapı Palace, the foreign minister Mustafa Reşid Pasha read aloud the <em>Hatt-ı Şerif of Gülhane</em>—a decree, issued in the name of the new young sultan Abdülmecid I, that promised to guarantee the life, honor, and property of all Ottoman subjects regardless of religion.</p><p>This was revolutionary. The <em>Tanzimat</em> ("Reorganization") it inaugurated represented a fundamental rethinking of the relationship between the Ottoman state and its subjects. A second major edict, the <em>Hatt-ı Hümayun</em> of 1856 (issued under European pressure after the Crimean War), went further, explicitly promising equality before the law for Muslims and non-Muslims.</p><p>New secular courts were created alongside the Islamic sharia courts. A new penal code based on the French model was promulgated. The military was reorganized. New schools were built. An Ottoman civic identity—<em>Osmanlılık</em>—was promoted to transcend religious divisions. The Tanzimat was imperfect and inconsistent, but it represented the most ambitious reform project in the empire's history.`,
+        facts: [['Launched','November 3, 1839'],['Key edict','Hatt-ı Şerif of Gülhane'],['Key minister','Mustafa Reşid Pasha'],['Core promise','Equal rights regardless of religion']],
+        quote: 'Henceforth the cause of every Ottoman subject shall be public to all. No punishment shall be inflicted without a lawful trial.'
+      },
+      {
+        tag: 'War', icon: '🎖️', title: 'The Crimean War, 1853–1856',
+        teaser: 'When Russia invaded Ottoman territory citing the need to "protect" Orthodox Christians, Britain and France came to Ottoman aid — a war that exposed both Ottoman weakness and European hypocrisy.',
+        body: `<p>The Crimean War arose from Russia's aggression against Ottoman Moldavia and Wallachia (modern Romania) under the pretext of protecting Orthodox Christian subjects. Britain and France, alarmed by Russian expansion toward the Mediterranean, entered the war on the Ottoman side in 1854.</p><p>The war was marked by colossal mismanagement on all sides—immortalized by the "Charge of the Light Brigade" and Florence Nightingale's pioneering hospital work at Scutari. The Ottomans performed creditably in some engagements. The Treaty of Paris (1856) ended the war with Russia pushed back and the Ottoman Empire formally admitted to the "Concert of Europe" as a recognized sovereign state.</p><p>The war had lasting consequences. The 1856 Hatt-ı Hümayun edict was partly a product of allied pressure—European powers demanded better treatment of Christian minorities as a condition of support. And the war left the empire deeply indebted to European creditors, beginning the cycle of foreign debt that would become a structural problem over the following decades.`,
+        facts: [['Dates','1853–1856'],['Allies','Britain, France, Sardinia'],['Enemy','Russia'],['Treaty','Paris, 1856']]
+      },
+      {
+        tag: 'Constitution', icon: '📋', title: 'The First Constitution, 1876',
+        teaser: 'Pressured by Young Ottoman reformers and European powers, the empire adopted its first constitution and convened an elected parliament — briefly.',
+        body: `<p>The Young Ottomans were a generation of intellectuals and bureaucrats educated in the new Tanzimat schools and influenced by European liberal thought—Namık Kemal, Ziya Pasha, Ali Suavi. They argued that constitutional government was both a liberal ideal and a practical tool for saving the empire, undercutting European interference by demonstrating Ottoman capacity for self-governance.</p><p>Their opportunity came in 1876, during a period of political crisis triggered by financial insolvency, uprisings in the Balkans, and international pressure. A faction of reformist ministers deposed Sultan Abdülaziz (who died under mysterious circumstances) and forced his successor Murad V, then Abdülhamid II, to accept a constitution.</p><p>The Ottoman Constitution of 1876 established a bicameral parliament with an elected lower house—the first representative legislature in the Islamic world. A parliament actually met in 1877. But Abdülhamid II, the new sultan, used the Russo-Ottoman War of 1877–78 as a pretext to suspend the constitution and dissolve parliament. It would not meet again until 1908, 30 years later.`,
+        facts: [['Constitution promulgated','December 23, 1876'],['Parliament met','1877–1878'],['Suspended by','Abdülhamid II'],['Restored','July Revolution, 1908']]
+      }
+    ]
+  },
+  {
+    id: 'collapse',
+    nav: 'Collapse',
+    hallNum: 'Hall VII',
+    title: 'Revolution, War & Collapse',
+    dates: '1876 – 1922',
+    heroBg: '#150A0A',
+    heroGradient: 'radial-gradient(ellipse at 50% 30%, #2a1010 0%, #0a0505 100%)',
+    intro: 'Abdülhamid\'s autocracy, the Young Turk Revolution, catastrophic wars, the Armenian Genocide, and finally the Turkish War of Independence — the end of an empire.',
+    timeline: [
+      { year: '1908', label: 'Young Turk Revolution' },
+      { year: '1912', label: 'Balkan Wars begin' },
+      { year: '1914', label: 'Enter WWI' },
+      { year: '1915', label: 'Armenian Genocide' },
+      { year: '1919', label: 'War of Independence' },
+      { year: '1922', label: 'Sultanate abolished' },
+    ],
+    exhibits: [
+      {
+        tag: 'Sultan', icon: '👁️', title: 'Abdülhamid II — The Red Sultan',
+        teaser: 'Brilliant and paranoid, Abdülhamid ruled for 33 years through pan-Islamic ideology, a vast secret police, press censorship — and mass killings of Armenians.',
+        body: `<p>Abdülhamid II (r. 1876–1909) was the most controversial of the later Ottoman sultans. He came to the throne accepting a constitution and quickly suspended it. He ruled for 33 years through a combination of pan-Islamic ideology, surveillance, press censorship, and diplomatic manipulation.</p><p>His pan-Islamic strategy—positioning the sultan as Caliph and protector of Muslims worldwide—gave the empire ideological reach beyond its shrinking borders. He exploited the telegraph to centralize control, built the Hejaz Railway to Medina for both practical and symbolic purposes, and invested heavily in education—all while maintaining an extensive network of informers and exiling opponents.</p><p>The massacres of Armenians in 1894–1896—in which between 100,000 and 300,000 Armenians were killed in pogroms throughout eastern Anatolia—earned him the label "the Red Sultan" in the European press. The massacres arose from a combination of Ottoman anxiety about Armenian autonomy movements and deliberate state-directed violence.</p><p>In 1909, after the Young Turk Revolution had restored the constitution and parliament, Abdülhamid attempted a counter-coup. It failed. The Committee of Union and Progress sent an army to Istanbul, deposed him, and exiled him to Salonica.`,
+        facts: [['Reigned','1876–1909 (33 years)'],['Regime','Authoritarian, pan-Islamic'],['Armenian massacres','1894–1896: 100,000–300,000 killed'],['Deposed by','Young Turk Revolution, 1909']]
+      },
+      {
+        tag: 'Revolution', icon: '✊', title: 'The Young Turk Revolution, 1908',
+        teaser: 'Military officers in Salonica demanded the constitution — and Abdülhamid astonishingly complied. For a brief moment, it seemed a liberal Ottoman future was possible.',
+        body: `<p>The Committee of Union and Progress (CUP), the core of the Young Turk movement, had been organizing in exile and within the Ottoman military for years. Its members were predominantly young military officers educated in the new war academies—men who saw European military power and connected it to constitutional government and modern institutions.</p><p>In July 1908, CUP-affiliated military units in Macedonia issued an ultimatum: restore the constitution or face a march on Istanbul. Abdülhamid, surprised and unwilling to risk civil war, capitulated. The 1876 constitution was restored. Parliament was reconvened. Political prisoners were freed. For weeks, scenes of astonishing celebration filled the streets of Istanbul—Muslims and Christians and Jews embracing, weeping, declaring the dawn of a new era.</p><p>The euphoria faded quickly. The CUP proved neither liberal nor united. Factional infighting, Bulgarian and Austrian annexations, and then the catastrophic Balkan Wars transformed the movement's idealism into a paranoid nationalism. By 1913, three men—Enver, Talaat, and Cemal Pashas—effectively controlled the government.`,
+        facts: [['Date','July 1908'],['Organizers','Committee of Union and Progress (CUP)'],['Result','Constitution restored, parliament recalled'],['Mood','Mass celebrations across the empire']]
+      },
+      {
+        tag: 'Genocide', icon: '🕯️', title: 'The Armenian Genocide, 1915–1923',
+        teaser: 'Beginning in 1915, the CUP government ordered the systematic deportation and massacre of Anatolia\'s Armenian population — killing between 600,000 and 1.5 million people.',
+        body: `<p>The Armenian Genocide was the systematic destruction of the Armenian people of Anatolia by the Ottoman government under the Committee of Union and Progress, carried out primarily during World War I. It is one of the most thoroughly documented atrocities of the twentieth century.</p><p>Beginning in April 1915—with the arrest and execution of Armenian community leaders in Istanbul—the government ordered the deportation of Armenians from Anatolia to the Syrian desert. The deportations were accompanied by systematic massacres: by Ottoman military units, by Kurdish irregular cavalry, and by paramilitaries of the Special Organization (<em>Teşkilât-ı Mahsusa</em>). Death marches across the desert without food or water killed thousands more.</p><p>Estimates of the death toll range from approximately 600,000 to 1.5 million. The Assyrian and Greek communities suffered parallel mass violence. Most of the Armenian community of Anatolia—which had existed there for over two thousand years—was destroyed. Property was confiscated.</p><p>Turkey officially denies that the events constituted genocide, though the genocide is recognized by most historians and more than 30 countries. The question remains a major political and diplomatic issue more than a century later.`,
+        facts: [['Began','April 24, 1915 (Armenian Genocide Remembrance Day)'],['Method','Deportation, massacre, death marches'],['Deaths','600,000–1.5 million Armenians'],['Recognition','30+ countries recognize as genocide']],
+        quote: 'I have been informed that a patriotic and military necessity has been determined to exile the Armenians from Anatolia.'
+      },
+      {
+        tag: 'End', icon: '🌅', title: 'Mustafa Kemal & the Birth of Turkey',
+        teaser: 'From the ruins of defeat, the general who had held Gallipoli forged a new nation — abolishing the sultanate in 1922 and founding the Republic of Turkey in 1923.',
+        body: `<p>By 1918, the empire lay shattered. Allied forces occupied Istanbul. The sultan's government signed the humiliating armistice of Mudros, and in 1920 accepted the Treaty of Sèvres—which would have reduced Turkey to a rump state with Greek, Armenian, and Kurdish zones carved out.</p><p>Into this wreckage stepped Mustafa Kemal, the general who had become a hero at Gallipoli and who refused to accept defeat. He organized a nationalist movement in Ankara, creating a rival government to the one in occupied Istanbul. He fought simultaneously against Greek forces (who had landed at Izmir in 1919), Armenian nationalists in the east, and French forces in the south.</p><p>The Turkish War of Independence (1919–1923) ended in nationalist victory. The Greek army was routed; Izmir was retaken in September 1922 in a campaign accompanied by massive violence against Greek and Armenian civilians. The Treaty of Lausanne (1923) established Turkey's modern borders.</p><p>On November 1, 1922, the Grand National Assembly abolished the Ottoman sultanate. The last sultan, Mehmed VI, fled into exile. On October 29, 1923, the Republic of Turkey was proclaimed. Mustafa Kemal became its first president, and in 1934 took the surname Atatürk—"Father of the Turks."`,
+        facts: [['Sultanate abolished','November 1, 1922'],['Last sultan','Mehmed VI (exiled)'],['Republic proclaimed','October 29, 1923'],['First president','Mustafa Kemal Atatürk']]
+      }
+    ]
+  },
+  {
+    id: 'legacy',
+    nav: 'Legacy',
+    hallNum: 'Hall VIII',
+    title: 'Legacy & the Modern World',
+    dates: '1922 – Present',
+    heroBg: '#0A0A14',
+    heroGradient: 'radial-gradient(ellipse at 50% 60%, #141428 0%, #040408 100%)',
+    intro: 'The Ottoman shadow falls across every map and border in the Middle East, every church and mosque in the Balkans, every contested city from Jerusalem to Sarajevo.',
+    timeline: [
+      { year: '1923', label: 'Republic of Turkey' },
+      { year: '1924', label: 'Caliphate abolished' },
+      { year: '1948', label: 'Israel founded (former territory)' },
+      { year: '2000s', label: 'Ottoman heritage revival' },
+    ],
+    exhibits: [
+      {
+        tag: 'Geography', icon: '🗺️', title: 'Borders Drawn in Sand',
+        teaser: 'The borders of Iraq, Syria, Lebanon, Palestine, Jordan, and much of the Middle East were drawn by British and French diplomats through former Ottoman territory — with consequences still felt today.',
+        body: `<p>When the Ottoman Empire collapsed after World War I, the great powers—primarily Britain and France—divided the Arab provinces into mandates that became modern states. The Sykes-Picot Agreement of 1916 had secretly divided the region into spheres of influence; the post-war mandates translated this into reality.</p><p>The result was a set of borders that largely ignored ethnic, religious, and tribal realities. Iraq contained Sunni Arabs, Shia Arabs, and Kurds with little historical basis for unity. Syria and Lebanon were divided, leaving populations split. The British Mandate of Palestine became the most contested territory in the world, as competing promises made to Arabs and Jews (the Balfour Declaration of 1917) produced a conflict that continues to this day.</p><p>The argument that the Middle East's modern conflicts are products of this arbitrary boundary-drawing is both widespread and partially correct—though it should not obscure the agency of regional actors or the complexity of forces that shaped the region's politics over the following century.`,
+        facts: [['Key agreement','Sykes-Picot, 1916'],['States created','Iraq, Syria, Lebanon, Jordan, Palestine/Israel'],['Enduring conflict','Israeli-Palestinian (British Mandate)'],['Kurdish question','Kurdistan never created (1920 Treaty of Sèvres)']]
+      },
+      {
+        tag: 'Religion', icon: '☪️', title: 'The End of the Caliphate',
+        teaser: 'When Atatürk abolished the caliphate in 1924, he removed the last symbolic head of Sunni Islam for the first time in 1,300 years — a vacuum that has never been filled.',
+        body: `<p>On March 3, 1924, Mustafa Kemal's government abolished the caliphate—the office of Commander of the Faithful, symbolic head of Sunni Islam. The last caliph, Abdülmecid II (who held only the religious title, not the sultanate), was sent into exile.</p><p>The abolition was a radical act with enormous global consequences. The caliphate had been vacant, weak, or in dispute for centuries, but the Ottoman sultans had given it institutional form for four hundred years. Muslim thinkers and leaders from India to Egypt debated urgently what the abolition meant and whether a new caliph should be chosen.</p><p>No consensus was ever reached. The caliphate was never restored. The vacuum it left has been exploited repeatedly—most grotesquely by the self-proclaimed "Islamic State" (ISIS/ISIL), which declared a new caliphate in 2014. The absence of a recognized caliphate continues to shape Islamic political thought and the politics of Muslim-majority countries.`,
+        facts: [['Abolished','March 3, 1924'],['Last caliph','Abdülmecid II'],['Duration of office','Official claim from 1517'],['Consequence','No recognized Sunni Caliph since']]
+      },
+      {
+        tag: 'Culture', icon: '🏛️', title: 'Architecture & Artistic Legacy',
+        teaser: 'From the Blue Mosque to the Alhambra, from Istanbul to Cairo, Ottoman and Ottoman-influenced architecture remains among the most beautiful built heritage on earth.',
+        body: `<p>The Ottoman architectural legacy is one of the empire's most tangible gifts to the world. The great imperial mosques of Istanbul—the Süleymaniye, the Blue Mosque (Sultan Ahmed Mosque), the Nuruosmaniye—are among the most visited monuments on earth, drawing millions of visitors every year. Sinan's Selimiye in Edirne is a UNESCO World Heritage Site.</p><p>Across the former empire's territories, Ottoman-era buildings shape urban landscapes from Sarajevo to Jerusalem, from Cairo to Baghdad. The Grand Bazaar in Istanbul, one of the oldest and largest covered markets in the world, still operates today. Ottoman hans (caravanserais) in Anatolia have been converted to hotels and cultural centers.</p><p>In the decorative arts, Ottoman traditions in carpet weaving, ceramic tile (the distinctive Iznik ware), calligraphy, and miniature painting have been continuously influential. The characteristic Ottoman geometric patterns and arabesques influenced European decorative arts through trade and diplomatic exchange.`,
+        facts: [['Blue Mosque built','1609–1616'],['Grand Bazaar','Operating since 1455'],['UNESCO sites','Süleymaniye Mosque, Selimiye, Istanbul Historic Areas'],['Iznik ceramics','16th-century peak; still produced today']]
+      },
+      {
+        tag: 'Memory', icon: '⚖️', title: 'History, Memory & Contested Legacies',
+        teaser: 'From Armenian genocide recognition to the romanticization of Ottoman rule, the empire\'s history remains vigorously contested across the nations it once governed.',
+        body: `<p>No aspect of Ottoman history is more contested than its end. The Armenian Genocide is recognized by most historians and more than 30 countries as genocide; Turkey officially denies this characterization, though an increasing number of Turkish scholars have challenged the official narrative. The controversy has blocked Turkish-Armenian diplomatic normalization for decades.</p><p>More broadly, Ottoman history is remembered very differently depending on who is remembering. In Turkey, the empire is simultaneously a source of national pride (Suleiman the Magnificent, the conquests) and a legacy to be transcended (the sultanate, religious governance). In Greece, Serbia, and Bulgaria, Ottoman rule is often remembered as oppression—the "Turkish yoke." In Arab countries, Ottoman governance is assessed ambivalently; in some contexts remembered as legitimate Islamic rule, in others as foreign occupation.</p><p>The recent rise of neo-Ottoman cultural and political influence in Turkey—particularly associated with the television series <em>Diriliş: Ertuğrul</em> (2014–2019) and President Erdoğan's references to Ottoman heritage—has reignited debates about how the empire should be remembered and whether its model has any relevance for the twenty-first century.`,
+        facts: [['Armenian Genocide recognized by','30+ countries; denied by Turkey'],['Hagia Sophia','Reconverted to mosque, 2020'],['Ottoman TV dramas','Exported to 60+ countries'],['Successor states','Approximately 40 modern nations']]
+      }
+    ]
+  }
+];
+
+// ─────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────
+let currentEra = 0;
+
+// ─────────────────────────────────────────────
+//  BUILD
+// ─────────────────────────────────────────────
+function buildApp() {
+  const nav = document.getElementById('main-nav');
+  const gallery = document.getElementById('gallery');
+  nav.innerHTML = '';
+  gallery.innerHTML = '';
+
+  ERAS.forEach((era, i) => {
+    // nav btn
+    const btn = document.createElement('button');
+    btn.className = 'nav-era' + (i === 0 ? ' active' : '');
+    btn.textContent = era.nav;
+    btn.onclick = () => gotoEra(i);
+    nav.appendChild(btn);
+
+    // hall
+    const hall = document.createElement('div');
+    hall.className = 'hall' + (i === 0 ? ' active' : '');
+    hall.id = 'hall-' + i;
+    hall.innerHTML = buildHall(era, i);
+    gallery.appendChild(hall);
+  });
+}
+
+function buildHall(era, idx) {
+  const tlHtml = era.timeline.map(e => `
+    <div class="tl-event" title="${e.label}">
+      <div class="tl-year">${e.year}</div>
+      <div class="tl-dot"></div>
+      <div class="tl-label">${e.label}</div>
+    </div>`).join('');
+
+  const cardsHtml = era.exhibits.map((ex, i) => `
+    <div class="exhibit-card" onclick="openModal(${idx},${i})">
+      <div class="exhibit-card-image">
+        <div class="exhibit-icon">${ex.icon}</div>
+      </div>
+      <div class="exhibit-card-body">
+        <div class="card-tag">${ex.tag}</div>
+        <div class="card-title">${ex.title}</div>
+        <div class="card-teaser">${ex.teaser}</div>
+        <div class="card-explore">Explore exhibit</div>
+      </div>
+    </div>`).join('');
+
+  const prevDisabled = idx === 0 ? 'disabled' : '';
+  const nextDisabled = idx === ERAS.length - 1 ? 'disabled' : '';
+
+  return `
+    <div class="hall-hero">
+      <div class="hall-hero-bg" style="background: ${era.heroGradient};"></div>
+      <div class="hall-hero-overlay"></div>
+      <div class="hall-hero-content">
+        <div class="hall-number">${era.hallNum} · ${era.dates}</div>
+        <div class="hall-title">${era.title}</div>
+        <div style="position:relative;z-index:1;font-family:'Crimson Text',serif;font-size:17px;color:#C4A96B;margin-top:0.8rem;max-width:600px;">${era.intro}</div>
+      </div>
+    </div>
+    <div class="timeline-strip"><div class="timeline-inner">${tlHtml}</div></div>
+    <div class="exhibit-area">
+      <div class="exhibit-grid">${cardsHtml}</div>
+    </div>
+    <div class="hall-nav">
+      <button class="hall-nav-btn" onclick="gotoEra(${idx-1})" ${prevDisabled}>← Previous Hall</button>
+      <button class="hall-nav-btn" onclick="gotoEra(${idx+1})" ${nextDisabled}>Next Hall →</button>
+    </div>`;
+}
+
+// ─────────────────────────────────────────────
+//  NAVIGATION
+// ─────────────────────────────────────────────
+function gotoEra(idx) {
+  if (idx < 0 || idx >= ERAS.length) return;
+  document.querySelectorAll('.hall').forEach(h => h.classList.remove('active'));
+  document.querySelectorAll('.nav-era').forEach(b => b.classList.remove('active'));
+  document.getElementById('hall-' + idx).classList.add('active');
+  document.querySelectorAll('.nav-era')[idx].classList.add('active');
+  currentEra = idx;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─────────────────────────────────────────────
+//  MODAL
+// ─────────────────────────────────────────────
+function openModal(eraIdx, exhibitIdx) {
+  const era = ERAS[eraIdx];
+  const ex = era.exhibits[exhibitIdx];
+
+  document.getElementById('modal-tag').textContent = ex.tag + ' — ' + era.title;
+  document.getElementById('modal-title').textContent = ex.title;
+
+  let factsHtml = '';
+  if (ex.facts) {
+    factsHtml = `<div class="modal-facts">` +
+      ex.facts.map(f => `<div class="modal-fact"><div class="fact-label">${f[0]}</div><div class="fact-value">${f[1]}</div></div>`).join('') +
+      `</div>`;
+  }
+
+  let quoteHtml = '';
+  if (ex.quote) {
+    quoteHtml = `<div class="modal-quote"><p>${ex.quote}</p></div>`;
+  }
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="modal-icon">${ex.icon}</div>
+    <div class="modal-text">${ex.body}</div>
+    ${quoteHtml}
+    ${factsHtml}
+  `;
+
+  document.getElementById('modal-backdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-backdrop') && !e.target.closest('.modal-close')) return;
+  document.getElementById('modal-backdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.getElementById('modal-backdrop').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+});
+
+// ─────────────────────────────────────────────
+//  ENTRY
+// ─────────────────────────────────────────────
+function enterMuseum() {
+  buildApp();
+  document.getElementById('app').classList.add('visible');
+  document.getElementById('entry-screen').classList.add('fade-out');
+  setTimeout(() => {
+    document.getElementById('entry-screen').style.display = 'none';
+  }, 1200);
+}
+</script>
+</body>
+</html>
